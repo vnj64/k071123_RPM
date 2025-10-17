@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: prk_project_db
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+    networks:
+      - k070923_network
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: prk_mailhog
+    restart: always
+    ports:
+      - "8025:8025"   # Web-интерфейс
+      - "1025:1025"   # SMTP сервер
+    networks:
+      - k070923_network
+
+networks:
+  k070923_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16

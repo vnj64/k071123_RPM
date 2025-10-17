@@ -1,0 +1,190 @@
+basePath: /
+definitions:
+  k071123_internal_services_notification_service_domain_props.SendEmailRequest:
+    properties:
+      data:
+        type: string
+      subject:
+        type: string
+      to:
+        items:
+          type: string
+        type: array
+    type: object
+  k071123_internal_services_notification_service_domain_props.SendEmailResp:
+    properties:
+      status:
+        type: string
+    type: object
+  k071123_internal_services_user_service_domain_models.User:
+    properties:
+      birth_date:
+        type: string
+      first_name:
+        type: string
+      phone_number:
+        type: string
+      second_name:
+        type: string
+      status:
+        $ref: '#/definitions/k071123_internal_services_user_service_domain_models_user_status.Status'
+      uuid:
+        type: string
+    type: object
+  k071123_internal_services_user_service_domain_models_user_status.Status:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - Active
+    - Inactive
+  k071123_internal_services_user_service_domain_props.CreateUserReq:
+    properties:
+      birth_date:
+        type: string
+      first_name:
+        type: string
+      phone_number:
+        type: string
+      second_name:
+        type: string
+      status:
+        $ref: '#/definitions/k071123_internal_services_user_service_domain_models_user_status.Status'
+    type: object
+  k071123_internal_services_user_service_domain_props.CreateUserResp:
+    properties:
+      user:
+        $ref: '#/definitions/k071123_internal_services_user_service_domain_models.User'
+    type: object
+  k071123_internal_utils_errs.Code:
+    enum:
+    - 500
+    - 400
+    - 401
+    - 403
+    - 404
+    - 405
+    - 409
+    - 422
+    - 429
+    - 503
+    - 504
+    type: integer
+    x-enum-comments:
+      BadRequest: Некорректный запрос
+      Conflict: Конфликт (например, дублирующая запись)
+      Forbidden: Запрещено
+      InternalServerError: Внутренняя ошибка сервера
+      MethodNotAllowed: Метод не разрешён
+      NotFound: Не найдено
+      ServiceUnavailable: Сервис временно недоступен
+      Timeout: Таймаут запроса
+      TooManyRequests: Слишком много запросов
+      Unauthorized: Неавторизованный доступ
+      UnprocessableEntity: Невозможность обработать запрос (например, валидация)
+    x-enum-varnames:
+    - InternalServerError
+    - BadRequest
+    - Unauthorized
+    - Forbidden
+    - NotFound
+    - MethodNotAllowed
+    - Conflict
+    - UnprocessableEntity
+    - TooManyRequests
+    - ServiceUnavailable
+    - Timeout
+  k071123_internal_utils_errs.Error:
+    properties:
+      code:
+        $ref: '#/definitions/k071123_internal_utils_errs.Code'
+      details:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:7801
+info:
+  contact: {}
+  description: Сервис для рассылки уведомлений
+  title: Notification Service API
+  version: "2.0"
+paths:
+  /api/v1/sender/email:
+    post:
+      consumes:
+      - application/json
+      description: Отправить Email
+      parameters:
+      - description: Данные для отправки email.
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/k071123_internal_services_notification_service_domain_props.SendEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус отправленного email.
+          schema:
+            $ref: '#/definitions/k071123_internal_services_notification_service_domain_props.SendEmailResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+        "404":
+          description: Profile not found
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+      summary: Отправить Email
+      tags:
+      - EmailSender
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Создать пользователя
+      parameters:
+      - description: Данные для создания пользователя.
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/k071123_internal_services_user_service_domain_props.CreateUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ. Модель пользователя.
+          schema:
+            $ref: '#/definitions/k071123_internal_services_user_service_domain_props.CreateUserResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+        "404":
+          description: Profile not found
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/k071123_internal_utils_errs.Error'
+      security:
+      - BearerAuth: []
+      summary: Создать пользователя
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    description: '"Enter your Bearer token in the format: `Bearer {token}`"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

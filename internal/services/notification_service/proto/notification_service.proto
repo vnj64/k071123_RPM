@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package notification;
+
+option go_package = "contracts/pkg/proto";
+
+
+service Notification {
+  rpc SendEmail(SendEmailReq) returns (SendEmailResp);
+}
+
+message SendEmailReq {
+  string subject = 1;
+  string data = 2;
+  repeated string to = 3;
+};
+
+message SendEmailResp {
+  string response = 1;
+}
