@@ -3,8 +3,6 @@ package main
 import (
 	"k071123/internal/services/user_service/core"
 	"k071123/internal/services/user_service/delivery/http"
-	"k071123/internal/services/user_service/docs"
-	"k071123/internal/services/user_service/services/config"
 	"sync"
 )
 
@@ -22,9 +20,6 @@ func main() {
 
 	di := core.NewDi()
 	server := core.NewHttpServer()
-	cfg := config.Make()
-
-	docs.SwaggerInfo.Host = "127.0.0.1:" + cfg.HttpPort()
 
 	handlers := &http.Handlers{
 		UserHandler: di.UserHandler,

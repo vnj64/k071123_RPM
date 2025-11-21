@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/gofiber/fiber/v2"
 	_ "k071123/internal/services/notification_service/domain/props"
+	_ "k071123/internal/services/parking_service/domain/props"
 	"k071123/internal/services/user_service/domain/cases/auth"
 	"k071123/internal/services/user_service/domain/props"
 	"k071123/internal/utils/errs"
@@ -19,6 +20,7 @@ func NewAuthHandler(useCase *auth.AuthUseCase) *AuthHandler {
 func RegisterAuthRoutes(router fiber.Router, uh *AuthHandler) {
 	router.Post("/send_code", uh.SendCodeHandler)
 	router.Post("/confirm_code", uh.ConfirmCodeHandler)
+	router.Post("/admin", uh.AdminLoginHandler)
 }
 
 // SendCodeHandler
@@ -68,6 +70,33 @@ func (h *AuthHandler) ConfirmCodeHandler(ctx *fiber.Ctx) error {
 	}
 
 	resp, err := h.useCase.ConfirmCode(args)
+	if err != nil {
+		return errs.SendError(ctx, err)
+	}
+
+	return errs.SendSuccess(ctx, fiber.StatusOK, resp)
+}
+
+// AdminLoginHandler
+// @Summary      Войти в систему для администратора
+// @Description  Войти в систему для администратора
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Security BearerAuth
+// @Param request body props.AdminLoginReq true "Login & Password."
+// @Success      200 {object} props.AdminLoginResp "Успешная авторизация."
+// @Failure      400 {object} errs.Error "Bad Request"
+// @Failure      404 {object} errs.Error "Profile not found"
+// @Failure      500 {object} errs.Error "Internal Server Error"
+// @Router       /api/v1/auth/admin [post]
+func (h *AuthHandler) AdminLoginHandler(ctx *fiber.Ctx) error {
+	var args props.AdminLoginReq
+	if err := ctx.BodyParser(&args); err != nil {
+		return errs.SendError(ctx, err)
+	}
+
+	resp, err := h.useCase.AdminLogin(args)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}

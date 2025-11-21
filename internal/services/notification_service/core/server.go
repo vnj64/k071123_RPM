@@ -34,7 +34,7 @@ func NewHttpServer() Server {
 
 	corsConfig := cors.New(cors.Config{
 		AllowOrigins: strings.Join([]string{
-			"http://localhost:7801/",
+			"http://localhost:7801/", "http://localhost:8129/",
 		}, ", "),
 		AllowMethods:     strings.Join(methods, ", "),
 		AllowHeaders:     strings.Join(headers, ", "),

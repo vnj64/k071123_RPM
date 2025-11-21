@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"k071123/internal/services/notification_service/domain/cases/sender"
 	"k071123/internal/services/notification_service/domain/props"
+	_ "k071123/internal/services/parking_service/domain/props"
 	_ "k071123/internal/services/user_service/domain/props"
 	"k071123/internal/utils/errs"
 )
@@ -19,7 +20,7 @@ func NewEmailSenderHandler(useCase *sender.EmailSenderUseCase) *EmailSenderHandl
 }
 
 func RegisterEmailSenderRoutes(router fiber.Router, uh *EmailSenderHandler) {
-	//router.Post("/email", uh.SendEmailHandler)
+	router.Post("/email", uh.SendEmailHandler)
 }
 
 // SendEmailHandler

@@ -6,7 +6,9 @@ import (
 	"k071123/internal/services/user_service/domain/cases/auth"
 	"k071123/internal/services/user_service/domain/cases/user"
 	"k071123/internal/services/user_service/services/config"
+	"k071123/internal/services/user_service/workers"
 	"k071123/internal/utils/middleware"
+	"log"
 )
 
 type Di struct {
@@ -25,11 +27,19 @@ func NewDi() *Di {
 		panic(err)
 	}
 
+	parkingGrpcClient, err := MakeParkingServiceClient()
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("success connection to parking grpc")
+
+	go workers.CreateAdminWorker(ctx)
+
 	var (
 		userUseCase = user.NewUserUseCase(ctx)
 		userHandler = http.NewUserHandler(userUseCase, mw)
 
-		authUseCase = auth.NewAuthUseCase(ctx, notificationGrpcClient)
+		authUseCase = auth.NewAuthUseCase(ctx, notificationGrpcClient, parkingGrpcClient)
 		authHandler = http.NewAuthHandler(authUseCase)
 	)
 	return &Di{

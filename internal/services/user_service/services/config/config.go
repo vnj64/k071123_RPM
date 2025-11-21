@@ -9,7 +9,7 @@ type Postgres struct {
 	Port     string `env:"POSTGRES_PORT"`
 	User     string `env:"POSTGRES_USER"`
 	Password string `env:"POSTGRES_PASSWORD"`
-	Database string `env:"POSTGRES_DB_NAME"`
+	Database string `env:"USER_DB_NAME"`
 	Host     string `env:"POSTGRES_HOST"`
 }
 
@@ -31,11 +31,23 @@ type NotificationGrpc struct {
 	Host string `env:"NOTIFICATION_GRPC_HOST"`
 }
 
+type ParkingGrpc struct {
+	Port string `env:"PARKING_GRPC_PORT"`
+	Host string `env:"PARKING_GRPC_HOST"`
+}
+
+type AdminData struct {
+	Login    string `env:"ADMIN_LOGIN"`
+	Password string `env:"ADMIN_PASSWORD"`
+}
+
 type Config struct {
 	Postgres         Postgres
 	HttpServer       HttpServer
 	Jwt              Jwt
 	NotificationGrpc NotificationGrpc
+	ParkingGrpc      ParkingGrpc
+	AdminData        AdminData
 }
 
 func Make() *Config {
@@ -105,4 +117,20 @@ func (c *Config) NotificationGrpcPort() string {
 
 func (c *Config) NotificationGrpcHost() string {
 	return c.NotificationGrpc.Host
+}
+
+func (c *Config) ParkingGrpcPort() string {
+	return c.ParkingGrpc.Port
+}
+
+func (c *Config) ParkingGrpcHost() string {
+	return c.ParkingGrpc.Host
+}
+
+func (c *Config) AdminLogin() string {
+	return c.AdminData.Login
+}
+
+func (c *Config) AdminPassword() string {
+	return c.AdminData.Password
 }

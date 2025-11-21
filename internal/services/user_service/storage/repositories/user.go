@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"k071123/internal/services/user_service/domain/models"
 )
@@ -30,7 +31,14 @@ func (r *UserRepository) GetByUUID(uuid string) (*models.User, error) {
 func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	var user models.User
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *UserRepository) Save(user *models.User) error {
+	return r.db.Where("uuid = ?", user.UUID).Save(user).Error
 }

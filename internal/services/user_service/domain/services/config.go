@@ -15,4 +15,8 @@ type Config interface {
 	PrivatePemPath() string
 	NotificationGrpcPort() string
 	NotificationGrpcHost() string
+	ParkingGrpcPort() string
+	ParkingGrpcHost() string
+	AdminPassword() string
+	AdminLogin() string
 }

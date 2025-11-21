@@ -1,0 +1,156 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Сервис для рассылки уведомлений",
+        "title": "Notification Service API",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:7801",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/sender/email": {
+            "post": {
+                "description": "Отправить Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EmailSender"
+                ],
+                "summary": "Отправить Email",
+                "parameters": [
+                    {
+                        "description": "Данные для отправки email.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_notification_service_domain_props.SendEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус отправленного email.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_notification_service_domain_props.SendEmailResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "errs.Code": {
+            "type": "integer",
+            "enum": [
+                500,
+                400,
+                401,
+                403,
+                404,
+                405,
+                409,
+                422,
+                429,
+                503,
+                504
+            ],
+            "x-enum-comments": {
+                "BadRequest": "Некорректный запрос",
+                "Conflict": "Конфликт (например, дублирующая запись)",
+                "Forbidden": "Запрещено",
+                "InternalServerError": "Внутренняя ошибка сервера",
+                "MethodNotAllowed": "Метод не разрешён",
+                "NotFound": "Не найдено",
+                "ServiceUnavailable": "Сервис временно недоступен",
+                "Timeout": "Таймаут запроса",
+                "TooManyRequests": "Слишком много запросов",
+                "Unauthorized": "Неавторизованный доступ",
+                "UnprocessableEntity": "Невозможность обработать запрос (например, валидация)"
+            },
+            "x-enum-varnames": [
+                "InternalServerError",
+                "BadRequest",
+                "Unauthorized",
+                "Forbidden",
+                "NotFound",
+                "MethodNotAllowed",
+                "Conflict",
+                "UnprocessableEntity",
+                "TooManyRequests",
+                "ServiceUnavailable",
+                "Timeout"
+            ]
+        },
+        "errs.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/errs.Code"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_notification_service_domain_props.SendEmailRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "k071123_internal_services_notification_service_domain_props.SendEmailResp": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "\"Enter your Bearer token in the format: `Bearer {token}`\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

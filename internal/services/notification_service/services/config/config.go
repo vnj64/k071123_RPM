@@ -9,7 +9,7 @@ type Postgres struct {
 	Port     string `env:"POSTGRES_PORT"`
 	User     string `env:"POSTGRES_USER"`
 	Password string `env:"POSTGRES_PASSWORD"`
-	Database string `env:"POSTGRES_DB_NAME"`
+	Database string `env:"NOTIFICATION_DB_NAME"`
 	Host     string `env:"POSTGRES_HOST"`
 }
 

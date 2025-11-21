@@ -1,0 +1,822 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для работы с доменом Parking",
+        "title": "Parking Service API",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:7802",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/parking/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать сущность парковки",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parking"
+                ],
+                "summary": "Создать сущность парковки",
+                "parameters": [
+                    {
+                        "description": "Данные для создания парковки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateParkingReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Модель созданной парковки.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateParkingResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/session/car": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Закончить парковочную сессию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Session"
+                ],
+                "summary": "Закончить парковочную сессию",
+                "parameters": [
+                    {
+                        "description": "Данные для стопа сессии",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateCarReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус сессии.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateCarResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/session/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Начать парковочную сессию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Session"
+                ],
+                "summary": "Начать парковочную сессию",
+                "parameters": [
+                    {
+                        "description": "Данные для старта сесси",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.StartSessionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус сессии.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.StartSessionResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/session/stop": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Закончить парковочную сессию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Session"
+                ],
+                "summary": "Закончить парковочную сессию",
+                "parameters": [
+                    {
+                        "description": "Данные для стопа сессии",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.FinishSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус сессии.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.FinishSessionResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tariff/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать тариф",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tariff"
+                ],
+                "summary": "Создать тариф",
+                "parameters": [
+                    {
+                        "description": "Данные для создания тарифа",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateTariffReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Модель созданной тарифа.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateTariffResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/unit/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать сущность Unit",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unit"
+                ],
+                "summary": "Создать сущность Unit",
+                "parameters": [
+                    {
+                        "description": "Данные для создания паркомата",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateUniqReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Модель созданной паркомата.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateUnitResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "errs.Code": {
+            "type": "integer",
+            "enum": [
+                500,
+                400,
+                401,
+                403,
+                404,
+                405,
+                409,
+                422,
+                429,
+                503,
+                504
+            ],
+            "x-enum-comments": {
+                "BadRequest": "Некорректный запрос",
+                "Conflict": "Конфликт (например, дублирующая запись)",
+                "Forbidden": "Запрещено",
+                "InternalServerError": "Внутренняя ошибка сервера",
+                "MethodNotAllowed": "Метод не разрешён",
+                "NotFound": "Не найдено",
+                "ServiceUnavailable": "Сервис временно недоступен",
+                "Timeout": "Таймаут запроса",
+                "TooManyRequests": "Слишком много запросов",
+                "Unauthorized": "Неавторизованный доступ",
+                "UnprocessableEntity": "Невозможность обработать запрос (например, валидация)"
+            },
+            "x-enum-varnames": [
+                "InternalServerError",
+                "BadRequest",
+                "Unauthorized",
+                "Forbidden",
+                "NotFound",
+                "MethodNotAllowed",
+                "Conflict",
+                "UnprocessableEntity",
+                "TooManyRequests",
+                "ServiceUnavailable",
+                "Timeout"
+            ]
+        },
+        "errs.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/errs.Code"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.Car": {
+            "type": "object",
+            "properties": {
+                "gos_number": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "settings": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.CarSettings"
+                },
+                "settings_uuid": {
+                    "type": "string"
+                },
+                "user_uuid": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.CarSettings": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "vin": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.Parking": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_parking_statuses.ParkingStatus"
+                },
+                "tariff_uuid": {
+                    "type": "string"
+                },
+                "total_places": {
+                    "type": "integer"
+                },
+                "uuid": {
+                    "type": "string"
+                },
+                "working_time": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.ParkingSchedule"
+                    }
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.ParkingSchedule": {
+            "type": "object",
+            "properties": {
+                "close_time": {
+                    "type": "string"
+                },
+                "days_of_week": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "open_time": {
+                    "type": "string"
+                },
+                "parking_uuid": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.Tariff": {
+            "type": "object",
+            "properties": {
+                "daily_price": {
+                    "type": "number"
+                },
+                "free_time": {
+                    "type": "integer"
+                },
+                "has_free": {
+                    "type": "boolean"
+                },
+                "hourly_price": {
+                    "type": "number"
+                },
+                "long_hourly_end": {
+                    "type": "integer"
+                },
+                "long_hourly_price": {
+                    "type": "number"
+                },
+                "long_hourly_start": {
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "TODO: подумать над необходиомостью",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.TariffType"
+                        }
+                    ]
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models.TariffType": {
+            "type": "string",
+            "enum": [
+                "free",
+                "hourly",
+                "long_hourly",
+                "daily"
+            ],
+            "x-enum-varnames": [
+                "Free",
+                "Hourly",
+                "LongHourly",
+                "Daily"
+            ]
+        },
+        "k071123_internal_services_parking_service_domain_models.Unit": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "234654",
+                    "type": "string"
+                },
+                "direction": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.UnitDirection"
+                },
+                "network_status": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.NetworkUnitStatus"
+                },
+                "parking_uuid": {
+                    "type": "string"
+                },
+                "qr_link": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.UnitStatus"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_models_parking_statuses.ParkingStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "closed"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "Inactive",
+                "Closed"
+            ]
+        },
+        "k071123_internal_services_parking_service_domain_models_unit_statuses.NetworkUnitStatus": {
+            "type": "string",
+            "enum": [
+                "online",
+                "offline"
+            ],
+            "x-enum-varnames": [
+                "Online",
+                "Offline"
+            ]
+        },
+        "k071123_internal_services_parking_service_domain_models_unit_statuses.UnitDirection": {
+            "type": "string",
+            "enum": [
+                "in",
+                "out"
+            ],
+            "x-enum-varnames": [
+                "In",
+                "Out"
+            ]
+        },
+        "k071123_internal_services_parking_service_domain_models_unit_statuses.UnitStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "warehouse",
+                "repair"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "Inactive",
+                "Warehouse",
+                "Repair"
+            ]
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateCarReq": {
+            "type": "object",
+            "properties": {
+                "gos_number": {
+                    "type": "string"
+                },
+                "user_uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateCarResp": {
+            "type": "object",
+            "properties": {
+                "car": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.Car"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateParkingReq": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tariff": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateTariffReq"
+                },
+                "total_places": {
+                    "type": "integer"
+                },
+                "working_time": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateParkingSchedule"
+                    }
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateParkingResp": {
+            "type": "object",
+            "properties": {
+                "parking": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.Parking"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateParkingSchedule": {
+            "type": "object",
+            "properties": {
+                "close_time": {
+                    "type": "string"
+                },
+                "days_of_week": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "open_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateTariffReq": {
+            "type": "object",
+            "properties": {
+                "daily_price": {
+                    "type": "number"
+                },
+                "free_time": {
+                    "type": "integer"
+                },
+                "has_free": {
+                    "type": "boolean"
+                },
+                "hourly_price": {
+                    "type": "number"
+                },
+                "long_hourly_end": {
+                    "type": "integer"
+                },
+                "long_hourly_price": {
+                    "type": "number"
+                },
+                "long_hourly_start": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.TariffType"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateTariffResp": {
+            "type": "object",
+            "properties": {
+                "tariff": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.Tariff"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateUniqReq": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "234654",
+                    "type": "string"
+                },
+                "direction": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.UnitDirection"
+                },
+                "network_status": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.NetworkUnitStatus"
+                },
+                "parking_uuid": {
+                    "type": "string"
+                },
+                "qr_link": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models_unit_statuses.UnitStatus"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.CreateUnitResp": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.Unit"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.FinishSessionRequest": {
+            "type": "object",
+            "properties": {
+                "session_uuid": {
+                    "type": "string"
+                },
+                "unit_uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.FinishSessionResp": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.StartSessionReq": {
+            "type": "object",
+            "properties": {
+                "car_number": {
+                    "type": "string"
+                },
+                "unit_uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_parking_service_domain_props.StartSessionResp": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "\"Enter your Bearer token in the format: `Bearer {token}`\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

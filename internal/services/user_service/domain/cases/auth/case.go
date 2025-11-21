@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"k071123/internal/services/notification_service/contracts/pkg/proto"
+	proto2 "k071123/internal/services/parking_service/contracts/pkg/proto"
 	"k071123/internal/services/user_service/domain"
 	"k071123/internal/services/user_service/domain/models"
 	"k071123/internal/services/user_service/domain/models/user_status"
@@ -19,15 +20,18 @@ import (
 )
 
 type AuthUseCase struct {
-	ctx          domain.Context
-	notifyClient proto.NotificationClient
+	ctx           domain.Context
+	notifyClient  proto.NotificationClient
+	parkingClient proto2.ParkingClient
 }
 
-func NewAuthUseCase(ctx domain.Context, nC proto.NotificationClient) *AuthUseCase {
-	return &AuthUseCase{ctx: ctx, notifyClient: nC}
+func NewAuthUseCase(ctx domain.Context, nC proto.NotificationClient, pC proto2.ParkingClient) *AuthUseCase {
+	return &AuthUseCase{ctx: ctx, notifyClient: nC, parkingClient: pC}
 }
 
 func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResponse, err error) {
+	// TODO: реализовать expiration_date
+
 	code := generateRandomToken()
 	message := fmt.Sprintf("Your confirmation code for PRK Project: %s", code)
 	subject := "Your confirmation code"
@@ -55,20 +59,33 @@ func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResp
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, err.Error())
 	}
 
-	now := time.Now()
-	user := &models.User{
-		UUID:   uuid.New(),
-		Status: user_status.Inactive,
-		Email:  args.Email,
-		Role:   permissions.Default,
-		Timestamps: timestamps.Timestamps{
-			CreatedAt: now,
-			UpdatedAt: &now,
-		},
+	user, err := uc.ctx.Connection().User().GetByEmail(args.Email)
+	if err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get user by email")
 	}
-	if err := uc.ctx.Connection().User().Add(user); err != nil {
-		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	if user == nil {
+		now := time.Now()
+		user := &models.User{
+			UUID:   uuid.New(),
+			Status: user_status.Active,
+			Email:  args.Email,
+			Role:   permissions.Default,
+			Timestamps: timestamps.Timestamps{
+				CreatedAt: now,
+				UpdatedAt: &now,
+			},
+		}
+		if err := uc.ctx.Connection().User().Add(user); err != nil {
+			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+		}
 	}
+
+	// TODO: gRPC CreateCar/Connect To user
+	// TODO: это не работает
+	_, err = uc.parkingClient.CreateCar(context.Background(), &proto2.CreateCarReq{
+		UserUUID:  user.UUID.String(),
+		GosNumber: args.CarNumber,
+	})
 
 	return props.SendCodeResponse{
 		Status: "success",
@@ -104,6 +121,38 @@ func (uc *AuthUseCase) ConfirmCode(args props.ConfirmCodeReq) (resp props.Confir
 	resp.AccessToken = acToken
 	resp.RefreshToken = refToken.RefreshTokenUUID.String()
 
+	return resp, nil
+}
+
+func (uc *AuthUseCase) AdminLogin(args props.AdminLoginReq) (resp props.AdminLoginResp, err error) {
+	cfg := uc.ctx.Services().Config()
+
+	envLogin := cfg.AdminLogin()
+	envPassword := cfg.AdminPassword()
+
+	user, err := uc.ctx.Connection().User().GetByEmail(args.Login)
+	if err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	}
+
+	if err := args.Validate(); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
+
+	if args.Login == envLogin && args.Password == envPassword {
+		resp.AccessToken, err = auth.GenerateAuthToken(user.UUID.String(), user.Role, cfg)
+		if err != nil {
+			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to generate access token")
+		}
+		refreshToken, err := auth.GenerateRefreshToken(user.UUID, cfg)
+		if err != nil {
+			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to generate refresh token")
+		}
+
+		resp.RefreshToken = refreshToken.RefreshTokenUUID.String()
+
+		return resp, nil
+	}
 	return resp, nil
 }
 

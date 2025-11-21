@@ -1,0 +1,548 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для работы с пользователем",
+        "title": "User Service API",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:7800",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/auth/admin": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Войти в систему для администратора",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Войти в систему для администратора",
+                "parameters": [
+                    {
+                        "description": "Login \u0026 Password.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.AdminLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешная авторизация.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.AdminLoginResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/confirm_code": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Подтвердить отправленный код",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Подтвердить отправленный код",
+                "parameters": [
+                    {
+                        "description": "Код потверждения и почта.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.ConfirmCodeReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешная авторизация.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.ConfirmCodeResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/send_code": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Отправить код подтверждения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Отправить код подтверждения",
+                "parameters": [
+                    {
+                        "description": "Почта пользователя.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.SendCodeReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус отправки Email.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.SendCodeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление профиля пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Обновление профиля пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления пользователя.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.UpdateProfileReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ. Модель пользователя.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.UpdateProfileResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Создать пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные для создания пользователя.",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.CreateUserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ. Модель пользователя.",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_user_service_domain_props.CreateUserResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "errs.Code": {
+            "type": "integer",
+            "enum": [
+                500,
+                400,
+                401,
+                403,
+                404,
+                405,
+                409,
+                422,
+                429,
+                503,
+                504
+            ],
+            "x-enum-comments": {
+                "BadRequest": "Некорректный запрос",
+                "Conflict": "Конфликт (например, дублирующая запись)",
+                "Forbidden": "Запрещено",
+                "InternalServerError": "Внутренняя ошибка сервера",
+                "MethodNotAllowed": "Метод не разрешён",
+                "NotFound": "Не найдено",
+                "ServiceUnavailable": "Сервис временно недоступен",
+                "Timeout": "Таймаут запроса",
+                "TooManyRequests": "Слишком много запросов",
+                "Unauthorized": "Неавторизованный доступ",
+                "UnprocessableEntity": "Невозможность обработать запрос (например, валидация)"
+            },
+            "x-enum-varnames": [
+                "InternalServerError",
+                "BadRequest",
+                "Unauthorized",
+                "Forbidden",
+                "NotFound",
+                "MethodNotAllowed",
+                "Conflict",
+                "UnprocessableEntity",
+                "TooManyRequests",
+                "ServiceUnavailable",
+                "Timeout"
+            ]
+        },
+        "errs.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/errs.Code"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_models.User": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/permissions.Role"
+                },
+                "second_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k071123_internal_services_user_service_domain_models_user_status.Status"
+                },
+                "timestamps": {
+                    "$ref": "#/definitions/timestamps.Timestamps"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_models_user_status.Status": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "Inactive"
+            ]
+        },
+        "k071123_internal_services_user_service_domain_props.AdminLoginReq": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.AdminLoginResp": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.ConfirmCodeReq": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.ConfirmCodeResp": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.CreateUserReq": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "second_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/k071123_internal_services_user_service_domain_models_user_status.Status"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.CreateUserResp": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/k071123_internal_services_user_service_domain_models.User"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.SendCodeReq": {
+            "type": "object",
+            "properties": {
+                "car_number": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.UpdateProfileReq": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "second_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_user_service_domain_props.UpdateProfileResp": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/k071123_internal_services_user_service_domain_models.User"
+                }
+            }
+        },
+        "permissions.Role": {
+            "type": "string",
+            "enum": [
+                "superadmin",
+                "parkingadmin",
+                "user"
+            ],
+            "x-enum-varnames": [
+                "SuperAdmin",
+                "ParkingAdmin",
+                "Default"
+            ]
+        },
+        "timestamps.Timestamps": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "\"Enter your Bearer token in the format: `Bearer {token}`\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

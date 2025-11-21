@@ -3,8 +3,6 @@ package main
 import (
 	"k071123/internal/services/notification_service/core"
 	"k071123/internal/services/notification_service/delivery/http"
-	"k071123/internal/services/notification_service/docs"
-	"k071123/internal/services/notification_service/services/config"
 	"log"
 	"sync"
 )
@@ -25,9 +23,6 @@ func main() {
 
 	server := core.NewHttpServer()
 	grpcServer := core.NewGrpcServer()
-
-	cfg := config.Make()
-	docs.SwaggerInfo.Host = "127.0.0.1:" + cfg.HttpPort()
 
 	handlers := &http.Handlers{
 		EmailSenderHandler: di.EmailSenderHandler,

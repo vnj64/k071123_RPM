@@ -36,17 +36,48 @@ func register(enumCase Permission, description ...string) Permission {
 var (
 	OnlySuperAdmin = register("any", "any")
 
-	CreateUser = register("user.user.create", "Create user")
+	// User Service
+	CreateUser    = register("user.user.create", "Create user")
+	UpdateProfile = register("user.user.update", "Self user update")
+
+	// Parking Service
+	CreateParking = register("parking.parking.create", "Create Parking")
+
+	CreateTariff = register("parking.tariff.create", "Create Tariff")
+
+	StartSession = register("parking.session.start", "Start Parking Session")
+	StopSession  = register("parking.session.stop", "Stop Parking Session")
+
+	CreateUnit = register("parking.unit.create", "Create Unit")
+
+	// Notification Service
+	// Order Service
+	SaveCard = register("order.card.save", "Save Card")
 )
 
 type RolePermissions map[Role][]Permission
 
 var rolePermissions = RolePermissions{
 	SuperAdmin: {
-		CreateUser,
+		CreateUser, UpdateProfile,
+		CreateParking,
+		CreateTariff,
+		CreateUnit,
+		StopSession,
 	},
-	ParkingAdmin: {},
-	Default:      {},
+	ParkingAdmin: {
+		UpdateProfile,
+		CreateParking,
+		CreateTariff,
+		StopSession,
+		CreateUnit,
+	},
+	Default: {
+		UpdateProfile,
+		StartSession,
+		StopSession,
+		SaveCard,
+	},
 }
 
 // PermissionsForRole Возвращает разрешения для конкретной роли

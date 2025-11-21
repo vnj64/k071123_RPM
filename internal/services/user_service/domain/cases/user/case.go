@@ -51,3 +51,35 @@ func (uc *UserUseCase) CreateUser(args *props.CreateUserReq) (resp props.CreateU
 
 	return resp, nil
 }
+
+func (uc *UserUseCase) UpdateProfile(args props.UpdateProfileReq) (resp props.UpdateProfileResp, err error) {
+	user, err := uc.ctx.Connection().User().GetByUUID(args.UserUUID)
+	if err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	}
+	if err := args.Validate(); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
+
+	if args.FirstName != nil {
+		user.FirstName = args.FirstName
+	}
+	if args.SecondName != nil {
+		user.SecondName = args.SecondName
+	}
+	if args.BirthDate != nil {
+		user.BirthDate = args.BirthDate
+	}
+	if args.PhoneNumber != nil {
+		user.PhoneNumber = args.PhoneNumber
+	}
+	now := time.Now()
+	user.Timestamps.UpdatedAt = &now
+
+	if err := uc.ctx.Connection().User().Save(user); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	}
+
+	resp.User = user
+	return resp, nil
+}

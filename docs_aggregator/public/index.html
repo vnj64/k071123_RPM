@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/swagger/">
+    <title>Service Swagger Documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        #header {
+            background: #3f51b5;
+            padding: 10px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #header label {
+            margin-right: 5px;
+        }
+        #service-selector, #environment-selector {
+            margin-left: 10px;
+            margin-right: 20px;
+            padding: 5px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        #swagger-ui {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="header">
+    <label for="service-selector">Select Service: </label>
+    <select id="service-selector">
+        <option value="notification_service.json">Notification Service</option>
+        <option value="parking_service.json">Parking Service</option>
+        <option value="user_service.json">User Service</option>
+        <option value="order_service.json">Order Service</option>
+    </select>
+    <label for="environment-selector">Select Environment:</label>
+    <select id="environment-selector">
+        <option value="local">Local</option>
+        <option value="dev">Dev</option>
+        <option value="prod">Prod</option>
+    </select>
+</div>
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+<script>
+    let ui;
+
+    const serviceSelector = document.getElementById("service-selector");
+    const environmentSelector = document.getElementById("environment-selector");
+    // Маппинг для dev и prod окружений
+    const envMapping = {
+        dev: "lalal.dev",
+        prod: "lalal.prod"
+    };
+
+    // Инициализация Swagger UI с переданной спецификацией
+    function initSwaggerWithSpec(spec) {
+        if (ui) {
+            // Если ui уже существует, очищаем контейнер
+            document.getElementById('swagger-ui').innerHTML = "";
+        }
+        ui = SwaggerUIBundle({
+            spec: spec,
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            persistAuthorization: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout"
+        });
+    }
+
+    // Функция загрузки и модификации swagger JSON
+    function loadSwaggerSpec(url) {
+        fetch(url)
+            .then(response => response.json())
+            .then(spec => {
+                const env = environmentSelector.value;
+                if (env === "local") {
+                    spec.schemes = ["http", "https"];
+                } else {
+                    spec.host = envMapping[env] || spec.host;
+                    spec.schemes = ["https", "http"];
+                }
+                initSwaggerWithSpec(spec);
+            })
+            .catch(error => console.error("Error loading swagger spec:", error));
+    }
+
+    // Обёртка над загрузкой swagger, сохраняем структуру вашего кода
+    function initSwagger(url) {
+        loadSwaggerSpec(url);
+    }
+
+    initSwagger(serviceSelector.value);
+
+    serviceSelector.addEventListener("change", function() {
+        initSwagger(serviceSelector.value);
+    });
+
+    environmentSelector.addEventListener("change", function() {
+        initSwagger(serviceSelector.value);
+    });
+</script>
+</body>
+</html>

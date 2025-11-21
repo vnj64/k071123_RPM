@@ -1,0 +1,167 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для работы с доменом Order",
+        "title": "Order Service API",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:7803",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/card/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Сохранить банковскую карту",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "Сохранить банковскую карту",
+                "parameters": [
+                    {
+                        "description": "Данные для создания парковки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_order_service_domain_props.SaveCardReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_order_service_domain_props.SaveCardResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "errs.Code": {
+            "type": "integer",
+            "enum": [
+                500,
+                400,
+                401,
+                403,
+                404,
+                405,
+                409,
+                422,
+                429,
+                503,
+                504
+            ],
+            "x-enum-comments": {
+                "BadRequest": "Некорректный запрос",
+                "Conflict": "Конфликт (например, дублирующая запись)",
+                "Forbidden": "Запрещено",
+                "InternalServerError": "Внутренняя ошибка сервера",
+                "MethodNotAllowed": "Метод не разрешён",
+                "NotFound": "Не найдено",
+                "ServiceUnavailable": "Сервис временно недоступен",
+                "Timeout": "Таймаут запроса",
+                "TooManyRequests": "Слишком много запросов",
+                "Unauthorized": "Неавторизованный доступ",
+                "UnprocessableEntity": "Невозможность обработать запрос (например, валидация)"
+            },
+            "x-enum-varnames": [
+                "InternalServerError",
+                "BadRequest",
+                "Unauthorized",
+                "Forbidden",
+                "NotFound",
+                "MethodNotAllowed",
+                "Conflict",
+                "UnprocessableEntity",
+                "TooManyRequests",
+                "ServiceUnavailable",
+                "Timeout"
+            ]
+        },
+        "errs.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/errs.Code"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_order_service_domain_props.SaveCardReq": {
+            "type": "object",
+            "properties": {
+                "card_number": {
+                    "type": "string"
+                },
+                "cvc": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "is_preferred": {
+                    "type": "boolean"
+                },
+                "payment_system": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_order_service_domain_props.SaveCardResp": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "\"Enter your Bearer token in the format: `Bearer {token}`\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

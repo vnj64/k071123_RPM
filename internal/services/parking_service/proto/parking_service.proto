@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package parking;
+
+option go_package = "contracts/pkg/proto";
+
+
+service Parking {
+  rpc CreateCar(CreateCarReq) returns (CreateCarResp);
+  rpc UpdateSessionPaid (UpdateSessionPaidRequest) returns (UpdateSessionPaidResponse);
+}
+
+message CreateCarReq {
+  string GosNumber = 1;
+  string UserUUID = 2;
+};
+
+message CreateCarResp {
+  Car Car = 1;
+}
+
+message Car {
+  string UUID = 1;
+  string UserUUID = 2;
+  string GosNumber = 3;
+  bool IsActive = 4;
+  CarSetting Settings = 5;
+}
+
+message CarSetting {
+  string UUID = 1;
+  string CarUUID = 2;
+  string Vin = 3;
+}
+
+message UpdateSessionPaidRequest {
+  string session_uuid = 1;
+}
+
+message UpdateSessionPaidResponse {
+}

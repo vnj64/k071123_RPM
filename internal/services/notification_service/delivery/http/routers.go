@@ -9,7 +9,7 @@ import (
 // @title Notification Service API
 // @version 1.0
 // @description API для рассылки уведомлений
-// @host localhost:7800
+// @host localhost:7801
 // @BasePath /api/v1
 // @schemes http
 func SetupRoutes(app *fiber.App, h *Handlers) {
