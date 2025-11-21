@@ -19,6 +19,12 @@ func NewParkingUseCase(ctx domain.Context) *ParkingUseCase {
 }
 
 func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props.CreateParkingResp, err error) {
+	tx, err := uc.ctx.Connection().Begin()
+	if err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to start transaction")
+	}
+	defer tx.Rollback()
+
 	parking := &models.Parking{
 		UUID:        uuid.New(),
 		Name:        args.Name,
@@ -63,6 +69,11 @@ func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to create parking")
 	}
 	resp.Parking = parking
+
+	err = tx.Commit()
+	if err != nil {
+		return props.CreateParkingResp{}, err
+	}
 
 	return resp, nil
 }

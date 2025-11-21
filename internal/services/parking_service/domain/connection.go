@@ -12,4 +12,12 @@ type Connection interface {
 	TariffRepository() repositories.TariffRepository
 	UnitRepository() repositories.UnitRepository
 	SessionRepository() repositories.SessionRepository
+	Begin() (TransactionalConnection, error)
+}
+
+type TransactionalConnection interface {
+	Connection
+
+	Commit() error
+	Rollback() error
 }
