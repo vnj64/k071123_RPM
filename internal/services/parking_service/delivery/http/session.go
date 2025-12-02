@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"k071123/internal/services/order_service/contracts/pkg/proto"
 	"k071123/internal/services/parking_service/domain/cases/car"
 	"k071123/internal/services/parking_service/domain/cases/session"
 	"k071123/internal/services/parking_service/domain/props"
@@ -15,13 +16,20 @@ type SessionHandler struct {
 	useCase    *session.SessionUseCase
 	carUseCase *car.CarUseCase
 	mw         *middleware.Middleware
+	oc         proto.OrderClient
 }
 
-func NewSessionHandler(useCase *session.SessionUseCase, carUc *car.CarUseCase, mw *middleware.Middleware) *SessionHandler {
+func NewSessionHandler(
+	useCase *session.SessionUseCase,
+	carUc *car.CarUseCase,
+	mw *middleware.Middleware,
+	oc proto.OrderClient,
+) *SessionHandler {
 	return &SessionHandler{
 		useCase:    useCase,
 		carUseCase: carUc,
 		mw:         mw,
+		oc:         oc,
 	}
 }
 
@@ -54,7 +62,13 @@ func (h *SessionHandler) StartSessionHandler(ctx *fiber.Ctx) error {
 		return errs.SendError(ctx, err)
 	}
 
-	resp, err := h.useCase.Start(args)
+	userUUID, err := middleware.GetUserUUIDFromContext(ctx)
+	if err != nil {
+		return errs.SendError(ctx, err)
+	}
+
+	args.UserUUID = userUUID
+	resp, err := h.useCase.Start(args, h.oc)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}
@@ -81,7 +95,7 @@ func (h *SessionHandler) FinishSessionHandler(ctx *fiber.Ctx) error {
 		return errs.SendError(ctx, err)
 	}
 
-	resp, err := h.useCase.Finish(args)
+	resp, err := h.useCase.Finish(args, h.oc)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}

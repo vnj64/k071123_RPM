@@ -505,6 +505,7 @@
             "type": "object",
             "properties": {
                 "daily_price": {
+                    "description": "10000",
                     "type": "number"
                 },
                 "free_time": {
@@ -514,15 +515,19 @@
                     "type": "boolean"
                 },
                 "hourly_price": {
+                    "description": "100",
                     "type": "number"
                 },
                 "long_hourly_end": {
+                    "description": "600 мин.",
                     "type": "integer"
                 },
                 "long_hourly_price": {
+                    "description": "10",
                     "type": "number"
                 },
                 "long_hourly_start": {
+                    "description": "120 мин.",
                     "type": "integer"
                 },
                 "type": {
@@ -775,6 +780,9 @@
         "k071123_internal_services_parking_service_domain_props.FinishSessionRequest": {
             "type": "object",
             "properties": {
+                "payment_method": {
+                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.PaymentMethod"
+                },
                 "session_uuid": {
                     "type": "string"
                 },
@@ -790,6 +798,15 @@
                     "type": "string"
                 }
             }
+        },
+        "k071123_internal_services_parking_service_domain_props.PaymentMethod": {
+            "type": "string",
+            "enum": [
+                "bank_card"
+            ],
+            "x-enum-varnames": [
+                "BankCard"
+            ]
         },
         "k071123_internal_services_parking_service_domain_props.StartSessionReq": {
             "type": "object",

@@ -17,6 +17,7 @@ func NewUnitUseCase(ctx domain.Context) *UnitUseCase {
 }
 
 func (uc *UnitUseCase) Create(args props.CreateUniqReq) (resp props.CreateUnitResp, err error) {
+	uc.ctx.Services().Logger().Info("create unit start")
 	unit := &models.Unit{
 		UUID:          uuid.New(),
 		Status:        args.Status,

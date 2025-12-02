@@ -65,6 +65,63 @@
                     }
                 }
             }
+        },
+        "/api/v1/card/verify": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Подтвердить банковскую карту",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "Подтвердить банковскую карту",
+                "parameters": [
+                    {
+                        "description": "Данные для подтверждения карты",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_order_service_domain_props.VerifyCardReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message",
+                        "schema": {
+                            "$ref": "#/definitions/k071123_internal_services_order_service_domain_props.VerifyCardResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errs.Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -154,6 +211,20 @@
                     "type": "string"
                 }
             }
+        },
+        "k071123_internal_services_order_service_domain_props.VerifyCardReq": {
+            "type": "object",
+            "properties": {
+                "cvc": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
+        "k071123_internal_services_order_service_domain_props.VerifyCardResp": {
+            "type": "object"
         }
     },
     "securityDefinitions": {

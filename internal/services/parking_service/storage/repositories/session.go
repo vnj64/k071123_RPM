@@ -49,7 +49,7 @@ func (r *SessionRepository) WhereFilter(filter repositories.SessionFilter) ([]mo
 	return parkings, nil
 }
 
-func (r *SessionRepository) Update(tx *gorm.DB, uuid uuid.UUID, updates repositories.SessionUpdates) error {
+func (r *SessionRepository) Update(uuid uuid.UUID, updates repositories.SessionUpdates) error {
 	var session models.Session
 	if err := r.db.Where("uuid = ?", uuid).First(&session).Error; err != nil {
 		return err
@@ -109,7 +109,9 @@ type sessionUpdates struct {
 	unitUUID    *uuid.UUID
 	carUUID     *uuid.UUID
 	userUUID    *uuid.UUID
+	status      *string
 	finishAt    *time.Time
+	cost        *float64
 }
 
 func (u *sessionUpdates) toMap() map[string]interface{} {
@@ -128,6 +130,12 @@ func (u *sessionUpdates) toMap() map[string]interface{} {
 	}
 	if u.finishAt != nil {
 		out["finish_at"] = u.finishAt
+	}
+	if u.status != nil {
+		out["status"] = u.status
+	}
+	if u.cost != nil {
+		out["cost"] = u.cost
 	}
 	return out
 }
@@ -154,6 +162,16 @@ func (u *sessionUpdates) SetUserUUID(userUUID uuid.UUID) repositories.SessionUpd
 
 func (u *sessionUpdates) SetFinishAt(finishAt *time.Time) repositories.SessionUpdates {
 	u.finishAt = finishAt
+	return u
+}
+
+func (u *sessionUpdates) SetStatus(status string) repositories.SessionUpdates {
+	u.status = &status
+	return u
+}
+
+func (u *sessionUpdates) SetCost(cost float64) repositories.SessionUpdates {
+	u.cost = &cost
 	return u
 }
 

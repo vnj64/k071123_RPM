@@ -24,6 +24,11 @@ func NewDi() *Di {
 	cfg := config.Make()
 	ctx := InitCtx()
 
+	oc, err := MakeOrderServiceClient()
+	if err != nil {
+		panic(err)
+	}
+
 	mw := middleware.NewMiddleware(cfg.PublicPemPath())
 	var (
 		parkingUseCase = parking.NewParkingUseCase(ctx)
@@ -33,8 +38,8 @@ func NewDi() *Di {
 		tariffHandler = http.NewTariffHandler(tariffUseCase, mw)
 
 		carUseCase     = car.NewCarUseCase(ctx)
-		sessionUseCase = session.NewSessionUseCase(ctx)
-		sessionHandler = http.NewSessionHandler(sessionUseCase, carUseCase, mw)
+		sessionUseCase = session.NewSessionUseCase(ctx, oc)
+		sessionHandler = http.NewSessionHandler(sessionUseCase, carUseCase, mw, oc)
 
 		unitUseCase = unit.NewUnitUseCase(ctx)
 		unitHandler = http.NewUnitHandler(unitUseCase, mw)

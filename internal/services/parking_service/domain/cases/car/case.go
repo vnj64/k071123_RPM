@@ -17,6 +17,8 @@ func NewCarUseCase(ctx domain.Context) *CarUseCase {
 }
 
 func (uc *CarUseCase) CreateCar(args props.CreateCarReq) (resp props.CreateCarResp, err error) {
+	log := uc.ctx.Services().Logger()
+	log.Printf("create car started work")
 	if err := args.Validate(); err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
 	}
@@ -25,6 +27,7 @@ func (uc *CarUseCase) CreateCar(args props.CreateCarReq) (resp props.CreateCarRe
 		UUID:      uuid.New(),
 		GosNumber: args.GosNumber,
 		IsActive:  true,
+		UserUUID:  uuid.MustParse(args.UserUUID),
 	}
 	if err := uc.ctx.Connection().CarRepository().Add(car); err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")

@@ -15,12 +15,15 @@ type Tariff struct {
 	HasFree  *bool `json:"has_free"`
 	FreeTime *int  `json:"free_time"`
 
-	HourlyPrice     float64 `json:"hourly_price"`
-	LongHourlyPrice float64 `json:"long_hourly_price"`
-	DailyPrice      float64 `json:"daily_price"`
+	HourlyPrice     float64 `json:"hourly_price"`      // 100
+	LongHourlyPrice float64 `json:"long_hourly_price"` // 10
+	DailyPrice      float64 `json:"daily_price"`       // 10000
+	// 60 - 120 == 200
+	// 10 + 10 + 10 // 300 мин.
+	// 600 мин. -> daily
 
-	LongHourlyStart int `json:"long_hourly_start"`
-	LongHourlyEnd   int `json:"long_hourly_end"`
+	LongHourlyStart int `json:"long_hourly_start"` // 120 мин.
+	LongHourlyEnd   int `json:"long_hourly_end"`   // 600 мин.
 }
 
 type TariffType string

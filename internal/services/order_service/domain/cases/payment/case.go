@@ -2,12 +2,14 @@ package payment
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"k071123/internal/services/order_service/domain"
 	"k071123/internal/services/order_service/domain/models"
 	"k071123/internal/services/order_service/domain/models/payment_statuses"
 	"k071123/internal/services/order_service/domain/props"
 	"k071123/internal/services/parking_service/contracts/pkg/proto"
 	"k071123/internal/utils/errs"
+	"strconv"
 )
 
 type PaymentUseCase struct {
@@ -20,6 +22,43 @@ func NewPaymentUseCase(ctx domain.Context, pc proto.ParkingClient) *PaymentUseCa
 		ctx: ctx,
 		pc:  pc,
 	}
+}
+
+func (uc *PaymentUseCase) MakePayment(args props.CreatePaymentReq) (resp props.CreatePaymentResp, err error) {
+	if err := args.Validate(); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
+
+	feeInt, err := strconv.Atoi(uc.ctx.Services().Config().PlatformFee())
+	feeFloat := float64(feeInt)
+
+	payment := &models.Payment{
+		UUID:          uuid.New(),
+		SessionUUID:   args.SessionUUID,
+		PaymentMethod: args.PaymentMethod,
+		Status:        payment_statuses.Succeeded,
+		TransactionId: uuid.New().String(),
+		Amount:        args.Amount,
+		PlatformFee:   &feeFloat,
+		Description:   args.Description,
+	}
+	if err := uc.ctx.Connection().Payment().Insert(payment); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to create payment [database error]")
+	}
+
+	cards, err := uc.ctx.Connection().Card().WhereFilter(uc.ctx.Connection().Card().Filter().SetUserUUIDs([]string{args.UserUUID.String()}))
+	if err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to find user bank card [database error]")
+	}
+	if len(cards) == 0 {
+		return resp, errs.NewErrorWithDetails(errs.ErrNotFound, "no user cards connected")
+	}
+	card := cards[0]
+	if err := uc.ctx.Services().Billing().AutoPay(*card.Token, args.Amount); err != nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to make payment [billing error]")
+	}
+	resp.Payment = payment
+	return resp, nil
 }
 
 func (uc *PaymentUseCase) UpdatePaymentSessionStatus(paymentID string, status payment_statuses.PaymentStatuses) error {

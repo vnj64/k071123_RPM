@@ -26,6 +26,7 @@ func (uc *EmailSenderUseCase) SendEmail(args *props.SendEmailRequest) (resp prop
 		resp.Status = "failed"
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, err.Error())
 	}
+	// TODO: rabbit subscriber
 	resp.Status = "success"
 
 	return resp, nil

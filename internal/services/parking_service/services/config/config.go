@@ -22,15 +22,29 @@ type ParkingGrpc struct {
 	Host string `env:"PARKING_GRPC_HOST"`
 }
 
+type OrderGrpc struct {
+	Port string `env:"ORDER_GRPC_PORT"`
+	Host string `env:"ORDER_GRPC_HOST"`
+}
+
 type Middleware struct {
 	PublicPemPath string `env:"JWT_PUBLIC_PEM_PATH"`
+}
+
+type Elastic struct {
+	Host     string `env:"ELASTIC_HOST"`
+	Port     string `env:"ELASTIC_PORT"`
+	Username string `env:"ELASTIC_USERNAME"`
+	Password string `env:"ELASTIC_PASSWORD"`
 }
 
 type Config struct {
 	Postgres    Postgres
 	HttpServer  HttpServer
 	ParkingGrpc ParkingGrpc
+	OrderGrpc   OrderGrpc
 	Middleware  Middleware
+	Elastic     Elastic
 }
 
 func Make() *Config {
@@ -80,4 +94,28 @@ func (c *Config) ParkingGrpcHost() string {
 
 func (c *Config) PublicPemPath() string {
 	return c.Middleware.PublicPemPath
+}
+
+func (c *Config) OrderGrpcPort() string {
+	return c.OrderGrpc.Port
+}
+
+func (c *Config) OrderGrpcHost() string {
+	return c.OrderGrpc.Host
+}
+
+func (c *Config) ElasticHost() string {
+	return c.Elastic.Host
+}
+
+func (c *Config) ElasticPort() string {
+	return c.Elastic.Port
+}
+
+func (c *Config) ElasticUsername() string {
+	return c.Elastic.Username
+}
+
+func (c *Config) ElasticPassword() string {
+	return c.Elastic.Password
 }

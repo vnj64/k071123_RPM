@@ -52,7 +52,8 @@ var (
 
 	// Notification Service
 	// Order Service
-	SaveCard = register("order.card.save", "Save Card")
+	SaveCard   = register("order.card.save", "Save Card")
+	VerifyCard = register("order.card.verify", "Verify Card")
 )
 
 type RolePermissions map[Role][]Permission
@@ -77,6 +78,7 @@ var rolePermissions = RolePermissions{
 		StartSession,
 		StopSession,
 		SaveCard,
+		VerifyCard,
 	},
 }
 

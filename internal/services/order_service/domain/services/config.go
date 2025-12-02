@@ -9,4 +9,5 @@ type Config interface {
 	HttpPort() string
 	ParkingGrpcPort() string
 	ParkingGrpcHost() string
+	PlatformFee() string
 }

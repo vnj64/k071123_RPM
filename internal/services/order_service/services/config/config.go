@@ -9,7 +9,7 @@ type Postgres struct {
 	Port     string `env:"POSTGRES_PORT"`
 	User     string `env:"POSTGRES_USER"`
 	Password string `env:"POSTGRES_PASSWORD"`
-	Database string `env:"PARKING_DB_NAME"`
+	Database string `env:"ORDER_DB_NAME"`
 	Host     string `env:"POSTGRES_HOST"`
 }
 
@@ -26,11 +26,22 @@ type Middleware struct {
 	PublicPemPath string `env:"JWT_PUBLIC_PEM_PATH"`
 }
 
+type OrderGrpc struct {
+	Port string `env:"ORDER_GRPC_PORT"`
+	Host string `env:"ORDER_GRPC_HOST"`
+}
+
+type AdminData struct {
+	PlatformFee string `env:"PLATFORM_FEE"`
+}
+
 type Config struct {
 	Postgres    Postgres
 	HttpServer  HttpServer
 	ParkingGrpc ParkingGrpc
 	Middleware  Middleware
+	OrderGrpc   OrderGrpc
+	AdminData   AdminData
 }
 
 func Make() *Config {
@@ -80,4 +91,16 @@ func (c *Config) ParkingGrpcHost() string {
 
 func (c *Config) PublicPemPath() string {
 	return c.Middleware.PublicPemPath
+}
+
+func (c *Config) OrderGrpcPort() string {
+	return c.OrderGrpc.Port
+}
+
+func (c *Config) OrderGrpcHost() string {
+	return c.OrderGrpc.Host
+}
+
+func (c *Config) PlatformFee() string {
+	return c.AdminData.PlatformFee
 }

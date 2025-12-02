@@ -20,15 +20,20 @@ func main() {
 
 	di := core.NewDi()
 	server := core.NewHttpServer()
+	grpcServer := core.NewGrpcServer()
 
 	handlers := &http.Handlers{
 		CardHandler: di.CardHandler,
 	}
 
 	http.SetupRoutes(server.App(), handlers)
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		server.Start()
+		defer wg.Done()
+	}()
+	go func() {
+		grpcServer.Start()
 		defer wg.Done()
 	}()
 	wg.Wait()

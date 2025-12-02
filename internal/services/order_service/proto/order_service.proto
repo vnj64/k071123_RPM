@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "contracts/pkg/proto";
+
+
+service Order {
+  rpc SaveCard(SaveCardReq) returns (SaveCardResp);
+  rpc GetPreferredByUserUUID(GetPreferredCardReq) returns (GetPreferredCardResp);
+  rpc CreatePayment(CreatePaymentReq) returns (CreatePaymentResp);
+}
+
+message SaveCardReq {
+  string user_uuid = 1;
+  string card_number = 2;
+  int64 date = 3;
+  string cvc = 4;
+  string payment_system = 5;
+  bool is_preferred = 6;
+  string email = 7;
+
+};
+
+message SaveCardResp {
+  string message = 1;
+}
+
+message GetPreferredCardReq {
+  string user_uuid = 1;
+}
+
+message GetPreferredCardResp {
+  Card Card = 1;
+}
+
+message Card {
+  string uuid = 1;
+  string last_4_digits = 2;
+  string payment_system = 3;
+  string user_uuid = 4;
+  bool is_preferred = 5;
+  string token = 6;
+  bool is_active = 7;
+}
+
+message Payment {
+  string uuid = 1;
+  string session_uuid = 2;
+  string payment_method = 3;
+  string status = 4;
+  string transaction_id = 5;
+  float amount = 6;
+  float platform_fee = 7;
+  string description = 8;
+}
+
+message CreatePaymentReq {
+  string session_uuid = 1;
+  string payment_method = 2;
+  float amount = 3;
+  string description = 4;
+  string user_uuid = 5;
+  string card_uuid = 6;
+}
+
+message CreatePaymentResp {
+  Payment Payment = 1;
+}

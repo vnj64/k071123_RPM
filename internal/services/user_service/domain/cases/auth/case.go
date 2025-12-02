@@ -65,9 +65,9 @@ func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResp
 	}
 	if user == nil {
 		now := time.Now()
-		user := &models.User{
+		user = &models.User{
 			UUID:   uuid.New(),
-			Status: user_status.Active,
+			Status: user_status.Inactive,
 			Email:  args.Email,
 			Role:   permissions.Default,
 			Timestamps: timestamps.Timestamps{

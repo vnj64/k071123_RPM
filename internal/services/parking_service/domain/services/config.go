@@ -9,4 +9,8 @@ type Config interface {
 	HttpPort() string
 	ParkingGrpcPort() string
 	ParkingGrpcHost() string
+	ElasticHost() string
+	ElasticPort() string
+	ElasticUsername() string
+	ElasticPassword() string
 }

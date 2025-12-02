@@ -21,11 +21,15 @@ func (r *verifyTokenRepository) Insert(model *models.VerifyTokens) error {
 
 func (r *verifyTokenRepository) GetLastByUserUUID(userUuid string) (*models.VerifyTokens, error) {
 	var model models.VerifyTokens
-	if err := r.db.Where("user_uuid = ? AND used = false", userUuid).First(&model).Error; err != nil {
+	if err := r.db.Where("user_uuid = ? AND used = false", userUuid).Order("created_at DESC").First(&model).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
 	return &model, nil
+}
+
+func (r *verifyTokenRepository) Save(model *models.VerifyTokens) error {
+	return r.db.Where("uuid = ?", model.UUID.String()).Save(model).Error
 }

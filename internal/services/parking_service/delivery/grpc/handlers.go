@@ -21,7 +21,7 @@ func NewHandler(ctx domain.Context, carUseCase *car.CarUseCase) *GrpcHandler {
 	}
 }
 
-func (h *GrpcHandler) CreateCarHandler(c context.Context, req *proto.CreateCarReq) (*proto.CreateCarResp, error) {
+func (h *GrpcHandler) CreateCar(c context.Context, req *proto.CreateCarReq) (*proto.CreateCarResp, error) {
 	resp, err := h.carUseCase.CreateCar(props.CreateCarReq{
 		GosNumber: req.GosNumber,
 		UserUUID:  req.UserUUID,

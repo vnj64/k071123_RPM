@@ -7,7 +7,6 @@ import (
 	"k071123/internal/services/parking_service/domain/models/parking_statuses"
 	"k071123/internal/services/parking_service/domain/props"
 	"k071123/internal/utils/errs"
-	"log"
 )
 
 type ParkingUseCase struct {
@@ -19,8 +18,15 @@ func NewParkingUseCase(ctx domain.Context) *ParkingUseCase {
 }
 
 func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props.CreateParkingResp, err error) {
+	log := uc.ctx.Services().Logger()
+	if err := args.Validate(); err != nil {
+		log.Fatalf("validation error: %s", err.Error())
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
+
 	tx, err := uc.ctx.Connection().Begin()
 	if err != nil {
+		log.Errorf("begin transaction error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to start transaction")
 	}
 	defer tx.Rollback()
@@ -35,18 +41,12 @@ func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props
 		Status:      parking_statuses.Active,
 	}
 
-	// TODO: функционал парсинга времени вынести в отдельную функцию
-	log.Print(len(args.WorkingTime))
-
 	var parkingScheduleList []models.ParkingSchedule
 	for i := 0; i < len(args.WorkingTime); i++ {
 		workingTime := ParkingScheduleParser(args.WorkingTime[i], parking.UUID)
 		parkingScheduleList = append(parkingScheduleList, workingTime)
 	}
-	//parking.WorkingTime = parkingScheduleList
-
-	log.Printf("%+v", len(parking.WorkingTime))
-	log.Printf("%+v", len(parkingScheduleList))
+	parking.WorkingTime = parkingScheduleList
 
 	tariff := &models.Tariff{
 		UUID:            uuid.New(),
@@ -61,11 +61,13 @@ func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props
 	}
 
 	parking.TariffUUID = tariff.UUID
-	if err := uc.ctx.Connection().TariffRepository().Add(tariff); err != nil {
+	if err := tx.TariffRepository().Add(tariff); err != nil {
+		log.Errorf("create tariff error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to create tariff")
 	}
 
-	if err := uc.ctx.Connection().ParkingRepository().Add(parking); err != nil {
+	if err := tx.ParkingRepository().Add(parking); err != nil {
+		log.Errorf("create parking error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to create parking")
 	}
 	resp.Parking = parking

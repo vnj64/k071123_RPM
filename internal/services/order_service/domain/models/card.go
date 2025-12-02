@@ -12,6 +12,6 @@ type Card struct {
 	PaymentSystem string                `json:"payment_system" gorm:"column:payment_system"`
 	UserUUID      string                `json:"user_uuid" gorm:"column:user_uuid"`
 	IsPreferred   bool                  `json:"is_preferred" gorm:"column:is_preferred"`
-	Token         string                `json:"token"`
+	Token         *string               `json:"token"`
 	IsActive      bool                  `json:"is_active"`
 }

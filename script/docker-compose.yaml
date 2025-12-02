@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    container_name: k07elastic
+    env_file:
+      - ../.env
+    build:
+      context: ./script/elastic/
+    volumes:
+      - ./elastic/config/elasticsearch.yml:/usr/share/elastic/config/elasticsearch.yml:ro
+    ports:
+      - "9300:9300"
+      - "${ELASTIC_PORT}:${ELASTIC_PORT}"
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      xpack.security.enabled: true
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms1536m -Xmx1536m"
+    mem_limit: 3g
+    mem_reservation: 512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      start_period: 30s
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      test: ["CMD-SHELL",
+        "curl -sS -f -u elastic:${ELASTIC_PASSWORD} \
+          'http://localhost:9200/_cluster/health?wait_for_status=green&timeout=10s' \
+          | grep -q '\"status\":\"green\"' || exit 1"]
+    networks:
+      - k070923_network
+  logstash:
+    container_name: k07logstash
+    env_file:
+      - ../.env
+    build:
+      context: ./script/logstash/
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "${LOGSTASH_PORT}:${LOGSTASH_PORT}"
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - k070923_network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+  es-init:
+    image: curlimages/curl:8.2.1
+    container_name: k07es_init
+    user: root
+    env_file:
+      - ../.env
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - k070923_network
+    volumes:
+      - elk-config:/data
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        curl -u elastic:${ELASTIC_PASSWORD} -s -X PUT \
+          "http://elasticsearch:9200/_security/service/elastic/kibana/credential/token/kibana-token" \
+        | grep -o '"value":"[^"]*"' | cut -d'"' -f4 > /data/kibana.token
+  kibana:
+    container_name: k07kibana
+    build:
+      context: ./script/kibana/
+    env_file:
+      - ../.env
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    volumes:
+      - elk-config:/usr/share/kibana/config
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "${KIBANA_PORT}:${KIBANA_PORT}"
+    networks:
+      - k070923_network
+    depends_on:
+      es-init:
+        condition: service_completed_successfully
+volumes:
+  elk-config:
+
+networks:
+  k070923_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

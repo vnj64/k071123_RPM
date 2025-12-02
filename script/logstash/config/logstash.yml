@@ -1,0 +1,6 @@
+http.host: "0.0.0.0"
+path.config: /usr/share/logstash/pipeline
+
+config.reload.automatic: true
+pipeline.separate_logs: true
+pipeline.ecs_compatibility: disabled

@@ -45,8 +45,6 @@ func NewConnection(user, password, host, port, database string) (domain.Connecti
 	}, nil
 }
 
-// ______ ТРАНЗАКЦИИ ______
-
 func (c *connection) Begin() (domain.TransactionalConnection, error) {
 	tx := c.db.Begin()
 	if tx.Error != nil {
@@ -71,7 +69,7 @@ func (t *txConnection) Rollback() error {
 }
 
 func (c *connection) get(repoPtr interface{}, factory func(*gorm.DB) interface{}) interface{} {
-	t := reflect.TypeOf(repoPtr).Elem()
+	t := reflect.TypeOf(repoPtr).Elem() // repoPrt = repositories.CarRepo
 
 	c.mu.Lock()
 	defer c.mu.Unlock()

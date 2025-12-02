@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"k071123/internal/services/parking_service/domain/models"
 	"time"
 )
@@ -13,6 +12,8 @@ type SessionUpdates interface {
 	SetCarUUID(value uuid.UUID) SessionUpdates
 	SetUserUUID(value uuid.UUID) SessionUpdates
 	SetFinishAt(finishAt *time.Time) SessionUpdates
+	SetStatus(status string) SessionUpdates
+	SetCost(cost float64) SessionUpdates
 
 	HaveUpdates() bool
 }
@@ -24,7 +25,7 @@ type SessionRepository interface {
 	Add(model *models.Session) error
 	GetByUUID(uuid string) (*models.Session, error)
 	WhereFilter(filter SessionFilter) ([]models.Session, error)
-	Update(tx *gorm.DB, uuid uuid.UUID, updates SessionUpdates) error
+	Update(uuid uuid.UUID, updates SessionUpdates) error
 }
 
 type SessionFilter interface {
