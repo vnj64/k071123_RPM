@@ -27,6 +27,16 @@ type OrderGrpc struct {
 	Host string `env:"ORDER_GRPC_HOST"`
 }
 
+type UserGrpc struct {
+	Port string `env:"USER_GRPC_PORT"`
+	Host string `env:"USER_GRPC_HOST"`
+}
+
+type NotificationGrpc struct {
+	Port string `env:"NOTIFICATION_GRPC_PORT"`
+	Host string `env:"NOTIFICATION_GRPC_HOST"`
+}
+
 type Middleware struct {
 	PublicPemPath string `env:"JWT_PUBLIC_PEM_PATH"`
 }
@@ -39,12 +49,14 @@ type Elastic struct {
 }
 
 type Config struct {
-	Postgres    Postgres
-	HttpServer  HttpServer
-	ParkingGrpc ParkingGrpc
-	OrderGrpc   OrderGrpc
-	Middleware  Middleware
-	Elastic     Elastic
+	Postgres         Postgres
+	HttpServer       HttpServer
+	ParkingGrpc      ParkingGrpc
+	OrderGrpc        OrderGrpc
+	UserGrpc         UserGrpc
+	Middleware       Middleware
+	Elastic          Elastic
+	NotificationGrpc NotificationGrpc
 }
 
 func Make() *Config {
@@ -118,4 +130,20 @@ func (c *Config) ElasticUsername() string {
 
 func (c *Config) ElasticPassword() string {
 	return c.Elastic.Password
+}
+
+func (c *Config) UserGrpcHost() string {
+	return c.UserGrpc.Host
+}
+
+func (c *Config) UserGrpcPort() string {
+	return c.UserGrpc.Port
+}
+
+func (c *Config) NotificationGrpcPort() string {
+	return c.NotificationGrpc.Port
+}
+
+func (c *Config) NotificationGrpcHost() string {
+	return c.NotificationGrpc.Host
 }

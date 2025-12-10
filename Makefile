@@ -3,6 +3,26 @@ ifneq (,$(wildcard .env))
     export
 endif
 
+SERVICE ?= parking
+
+TEST_PACKAGES := $(shell go list ./internal/services/$(SERVICE)_service/... | grep -v '/mocks')
+
+COVERAGE_FILE := coverage.out
+HTML_COVERAGE_FILE := coverage.html
+
+.PHONY: test
+test:
+	@echo "Testing service: $(SERVICE)"
+	go test ./internal/services/$(SERVICE)_service/... \
+    -coverprofile=coverage.out \
+    -coverpkg=./internal/services/$(SERVICE)_service/...
+
+.PHONY: cover
+cover: test
+	@echo "Generating HTML coverage report..."
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage HTML saved to $(HTML_COVERAGE_FILE)"
+
 swag:
 	go run tools/swaggergen.go
 

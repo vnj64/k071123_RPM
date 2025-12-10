@@ -13,14 +13,16 @@ type ParkingUseCase struct {
 	ctx domain.Context
 }
 
+// TODO: CRUD PARKING
+
 func NewParkingUseCase(ctx domain.Context) *ParkingUseCase {
 	return &ParkingUseCase{ctx: ctx}
 }
 
 func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props.CreateParkingResp, err error) {
-	log := uc.ctx.Services().Logger()
+	log := uc.ctx.Services().Logger().WithField("ParkingUseCase", "ParkingUseCase.CreateParking")
 	if err := args.Validate(); err != nil {
-		log.Fatalf("validation error: %s", err.Error())
+		log.Errorf("validation error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
 	}
 
@@ -48,22 +50,32 @@ func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props
 	}
 	parking.WorkingTime = parkingScheduleList
 
-	tariff := &models.Tariff{
-		UUID:            uuid.New(),
-		Type:            args.Tariff.Type,
-		HasFree:         args.Tariff.HasFree,
-		FreeTime:        args.Tariff.FreeTime,
-		HourlyPrice:     args.Tariff.HourlyPrice,
-		LongHourlyPrice: args.Tariff.LongHourlyPrice,
-		DailyPrice:      args.Tariff.DailyPrice,
-		LongHourlyEnd:   args.Tariff.LongHourlyEnd,
-		LongHourlyStart: args.Tariff.LongHourlyStart,
-	}
+	if args.Tariff != nil && args.TariffUUID == nil {
+		tariff := &models.Tariff{
+			UUID:            uuid.New(),
+			Type:            args.Tariff.Type,
+			HasFree:         args.Tariff.HasFree,
+			FreeTime:        args.Tariff.FreeTime,
+			HourlyPrice:     args.Tariff.HourlyPrice,
+			LongHourlyPrice: args.Tariff.LongHourlyPrice,
+			DailyPrice:      args.Tariff.DailyPrice,
+			LongHourlyEnd:   args.Tariff.LongHourlyEnd,
+			LongHourlyStart: args.Tariff.LongHourlyStart,
+		}
 
-	parking.TariffUUID = tariff.UUID
-	if err := tx.TariffRepository().Add(tariff); err != nil {
-		log.Errorf("create tariff error: %s", err.Error())
-		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to create tariff")
+		parking.TariffUUID = tariff.UUID
+		if err := tx.TariffRepository().Add(tariff); err != nil {
+			log.Errorf("create tariff error: %s", err.Error())
+			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to create tariff")
+		}
+	}
+	if args.TariffUUID != nil {
+		tariff, err := tx.TariffRepository().GetByUUID(*args.TariffUUID)
+		if err != nil {
+			log.Errorf("get tariff error: %s", err.Error())
+			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to get tariff")
+		}
+		parking.TariffUUID = tariff.UUID
 	}
 
 	if err := tx.ParkingRepository().Add(parking); err != nil {
@@ -79,3 +91,7 @@ func (uc *ParkingUseCase) CreateParking(args props.CreateParkingReq) (resp props
 
 	return resp, nil
 }
+
+//func (uc *ParkingUseCase) SearchParking(args props.SearchParkingReq) (resp props.SearchParkingResp, err error) {
+//
+//}

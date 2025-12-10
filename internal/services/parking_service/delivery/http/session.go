@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"k071123/internal/services/order_service/contracts/pkg/proto"
 	"k071123/internal/services/parking_service/domain/cases/car"
 	"k071123/internal/services/parking_service/domain/cases/session"
@@ -9,7 +10,7 @@ import (
 	"k071123/internal/shared/permissions"
 	"k071123/internal/utils/errs"
 	"k071123/internal/utils/middleware"
-	"log"
+	"k071123/tools/logger"
 )
 
 type SessionHandler struct {
@@ -17,6 +18,7 @@ type SessionHandler struct {
 	carUseCase *car.CarUseCase
 	mw         *middleware.Middleware
 	oc         proto.OrderClient
+	log        *logger.Logger
 }
 
 func NewSessionHandler(
@@ -24,12 +26,14 @@ func NewSessionHandler(
 	carUc *car.CarUseCase,
 	mw *middleware.Middleware,
 	oc proto.OrderClient,
+	log *logger.Logger,
 ) *SessionHandler {
 	return &SessionHandler{
 		useCase:    useCase,
 		carUseCase: carUc,
 		mw:         mw,
 		oc:         oc,
+		log:        log,
 	}
 }
 
@@ -39,8 +43,7 @@ func RegisterSessionRoutes(router fiber.Router, sh *SessionHandler, mw *middlewa
 	}), sh.StartSessionHandler)
 	router.Post("/stop", mw.AuthMiddleware([]permissions.Permission{
 		permissions.StopSession,
-	}))
-	router.Post("/car", mw.AuthMiddleware([]permissions.Permission{}), sh.CreateCarHandler)
+	}), sh.FinishSessionHandler)
 }
 
 // StartSessionHandler
@@ -58,12 +61,15 @@ func RegisterSessionRoutes(router fiber.Router, sh *SessionHandler, mw *middlewa
 // @Router       /api/v1/session/start [post]
 func (h *SessionHandler) StartSessionHandler(ctx *fiber.Ctx) error {
 	var args props.StartSessionReq
+	log := h.log.WithField("Handler", "StartSession")
 	if err := ctx.BodyParser(&args); err != nil {
+		log.Errorf("unable to parse StartSession request body: %v", err)
 		return errs.SendError(ctx, err)
 	}
 
 	userUUID, err := middleware.GetUserUUIDFromContext(ctx)
 	if err != nil {
+		log.Errorf("unable to get userUUID from context: %v", err)
 		return errs.SendError(ctx, err)
 	}
 
@@ -95,41 +101,14 @@ func (h *SessionHandler) FinishSessionHandler(ctx *fiber.Ctx) error {
 		return errs.SendError(ctx, err)
 	}
 
-	resp, err := h.useCase.Finish(args, h.oc)
-	if err != nil {
-		return errs.SendError(ctx, err)
-	}
-
-	return errs.SendSuccess(ctx, fiber.StatusCreated, resp)
-}
-
-// CreateCarHandler
-// @Summary      Закончить парковочную сессию
-// @Description  Закончить парковочную сессию
-// @Tags         Session
-// @Accept       json
-// @Produce      json
-// @Security BearerAuth
-// @Param request body props.CreateCarReq true "Данные для стопа сессии"
-// @Success      200 {object} props.CreateCarResp "Статус сессии."
-// @Failure      400 {object} errs.Error "Bad Request"
-// @Failure      404 {object} errs.Error "Profile not found"
-// @Failure      500 {object} errs.Error "Internal Server Error"
-// @Router       /api/v1/session/car [post]
-func (h *SessionHandler) CreateCarHandler(ctx *fiber.Ctx) error {
-	var args props.CreateCarReq
-	if err := ctx.BodyParser(&args); err != nil {
-		return errs.SendError(ctx, err)
-	}
-
 	userUUID, err := middleware.GetUserUUIDFromContext(ctx)
 	if err != nil {
+		log.Infof("user: %s", userUUID)
 		return errs.SendError(ctx, err)
 	}
+	log.Infof("car number: %s", args.CarNumber)
 	args.UserUUID = userUUID
-	log.Printf("user uuid from ctx %s", userUUID)
-
-	resp, err := h.carUseCase.CreateCar(args)
+	resp, err := h.useCase.Finish(args, h.oc)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}

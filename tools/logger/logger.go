@@ -8,9 +8,12 @@ import (
 	"gopkg.in/go-extras/elogrus.v8"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
+
+type Logger struct {
+	*logrus.Logger
+}
 
 type Config struct {
 	Host     string
@@ -18,89 +21,64 @@ type Config struct {
 	Username string
 	Password string
 	Index    string
+	Service  string
 }
 
-var (
-	instance *logrus.Logger
-	once     sync.Once
-)
+func New(cfg Config) (*Logger, error) {
+	if cfg.Host == "" || cfg.Port == "" || cfg.Index == "" {
+		return nil, errors.New("invalid logger config: host/port/index required")
+	}
 
-func New(cfg Config) (*logrus.Logger, error) {
-	var initErr error
-
-	once.Do(func() {
-		l := logrus.New()
-		l.SetFormatter(&logrus.JSONFormatter{
-			TimestampFormat: time.RFC3339,
-		})
-		l.SetLevel(logrus.DebugLevel)
-
-		if cfg.Host == "" || cfg.Port == "" || cfg.Index == "" {
-			initErr = errors.New("invalid logger config: host/port/index required")
-			return
-		}
-
-		esURL := fmt.Sprintf("http://%s:%s", cfg.Host, cfg.Port)
-
-		esClient, err := elasticsearch.NewClient(elasticsearch.Config{
-			Addresses: []string{esURL},
-			Username:  cfg.Username,
-			Password:  cfg.Password,
-			Transport: &http.Transport{Proxy: nil},
-		})
-		if err != nil {
-			initErr = err
-			return
-		}
-
-		exists, err := esClient.Indices.Exists([]string{cfg.Index})
-		if err != nil {
-			initErr = err
-			return
-		}
-
-		if exists.StatusCode == 404 {
-			_, err := esClient.Indices.Create(
-				cfg.Index,
-				esClient.Indices.Create.WithBody(strings.NewReader(
-					`{
-					  "mappings": {
-						"properties": {
-						  "@timestamp": { "type": "date" },
-						  "message":    { "type": "text" }
-						}
-					  }
-					}`,
-				)),
-			)
-
-			if err != nil {
-				initErr = err
-				return
-			}
-		}
-
-		hook, err := elogrus.NewAsyncElasticHook(esClient, esURL, logrus.DebugLevel, cfg.Index)
-		if err != nil {
-			initErr = err
-			return
-		}
-
-		l.Hooks.Add(hook)
-
-		instance = l
+	base := logrus.New()
+	base.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat: time.RFC3339Nano,
 	})
+	base.SetLevel(logrus.InfoLevel)
 
-	if initErr != nil {
-		return nil, initErr
+	esURL := fmt.Sprintf("http://%s:%s", cfg.Host, cfg.Port)
+
+	esClient, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{esURL},
+		Username:  cfg.Username,
+		Password:  cfg.Password,
+		Transport: &http.Transport{},
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return instance, nil
-}
-
-func L() *logrus.Logger {
-	if instance == nil {
-		panic("logger not initialized: call logger.New() first")
+	// Проверка индекса
+	exists, err := esClient.Indices.Exists([]string{cfg.Index})
+	if err != nil {
+		return nil, err
 	}
-	return instance
+	if exists.StatusCode == 404 {
+		_, err := esClient.Indices.Create(
+			cfg.Index,
+			esClient.Indices.Create.WithBody(strings.NewReader(
+				`{
+				  "mappings": {
+					"properties": {
+					  "@timestamp": { "type": "date" },
+					  "level": { "type": "keyword" },
+					  "service": { "type": "keyword" },
+					  "message": { "type": "text" }
+					}
+				  }
+				}`,
+			)),
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Hook
+	hook, err := elogrus.NewAsyncElasticHook(esClient, esURL, logrus.DebugLevel, cfg.Index)
+	if err != nil {
+		return nil, err
+	}
+	base.Hooks.Add(hook)
+
+	return &Logger{Logger: base}, nil
 }

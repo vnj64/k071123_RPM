@@ -46,7 +46,7 @@ func (h *UnitHandler) CreateUnitHandler(ctx *fiber.Ctx) error {
 		return errs.SendError(ctx, err)
 	}
 
-	resp, err := h.useCase.Create(args)
+	resp, err := h.useCase.CreateUnit(args)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}

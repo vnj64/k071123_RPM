@@ -19,4 +19,10 @@ type Config interface {
 	ParkingGrpcHost() string
 	AdminPassword() string
 	AdminLogin() string
+	ElasticPassword() string
+	ElasticUsername() string
+	ElasticPort() string
+	ElasticHost() string
+	UserGrpcHost() string
+	UserGrpcPort() string
 }

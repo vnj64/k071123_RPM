@@ -6,9 +6,10 @@ import (
 )
 
 type VerificationCode struct {
-	UUID      uuid.UUID `json:"uuid"`
-	Email     string    `json:"email"`
-	Code      string    `json:"code"`
-	Used      bool      `json:"used"`
-	CreatedAt time.Time `json:"created_at"`
+	UUID           uuid.UUID `json:"uuid"`
+	Email          string    `json:"email"`
+	Code           string    `json:"code"`
+	Used           bool      `json:"used"`
+	ExpirationDate time.Time `json:"expiration_date"`
+	CreatedAt      time.Time `json:"created_at"`
 }

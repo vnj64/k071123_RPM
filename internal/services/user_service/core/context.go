@@ -5,6 +5,7 @@ import (
 	domainServices "k071123/internal/services/user_service/domain/services"
 	"k071123/internal/services/user_service/services/config"
 	"k071123/internal/services/user_service/storage/repositories"
+	"k071123/tools/logger"
 )
 
 type Ctx struct {
@@ -14,10 +15,15 @@ type Ctx struct {
 
 type svs struct {
 	config domainServices.Config
+	logger *logger.Logger
 }
 
 func (s *svs) Config() domainServices.Config {
 	return s.config
+}
+
+func (s *svs) Logger() *logger.Logger {
+	return s.logger
 }
 
 func (c *Ctx) Services() domain.Services {
@@ -37,6 +43,20 @@ func (c *Ctx) Make() domain.Context {
 
 func InitCtx() *Ctx {
 	cfg := config.Make()
+
+	loggerCfg := logger.Config{
+		Host:     cfg.ElasticHost(),
+		Port:     cfg.ElasticPort(),
+		Username: cfg.ElasticUsername(),
+		Password: cfg.ElasticPassword(),
+		Index:    "user",
+		Service:  "user_service",
+	}
+	log, err := logger.New(loggerCfg)
+	if err != nil {
+		panic(err)
+	}
+
 	sqlConnection, err := repositories.NewConnection(
 		cfg.PostgresUser(),
 		cfg.PostgresPassword(),
@@ -51,6 +71,7 @@ func InitCtx() *Ctx {
 	return &Ctx{
 		services: &svs{
 			config: cfg,
+			logger: log,
 		},
 		connection: sqlConnection,
 	}

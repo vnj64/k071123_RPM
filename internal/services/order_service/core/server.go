@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"k071123/internal/services/order_service/domain"
 	"k071123/internal/services/order_service/services/config"
+	"k071123/internal/utils/middleware"
 	"runtime"
 	"strings"
 )
@@ -20,7 +21,11 @@ type Server interface {
 }
 
 func NewHttpServer() Server {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Prefork:       false,
+		CaseSensitive: true,
+	})
+
 	ctx := InitCtx()
 
 	var methods = []string{fiber.MethodGet, fiber.MethodPost, fiber.MethodPut, fiber.MethodDelete}
@@ -38,11 +43,15 @@ func NewHttpServer() Server {
 		}, ", "),
 		AllowMethods:     strings.Join(methods, ", "),
 		AllowHeaders:     strings.Join(headers, ", "),
-		AllowCredentials: true, // Убедимся, что можно передавать куки и авторизационные заголовки
+		AllowCredentials: true,
 		MaxAge:           300,
 	})
 
+	app.Use(middleware.LoggerMiddleware(ctx.Services().Logger()))
+	app.Use(middleware.PanicRecovery(ctx.Services().Logger()))
+
 	app.Use(corsConfig)
+
 	app.Use(func(c *fiber.Ctx) error {
 		c.Locals("context", ctx)
 		return c.Next()
@@ -60,7 +69,7 @@ func (s *HttpServer) Start() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	err := s.app.Listen(":" + cfg.HttpPort())
 	if err != nil {
-		panic("http server inst start successfully")
+		panic("http server isn't started successfully")
 	}
 }
 

@@ -13,4 +13,13 @@ type Config interface {
 	SmtpUser() string
 	SmtpPassword() string
 	SmtpFrom() string
+
+	ElasticPassword() string
+	ElasticUsername() string
+	ElasticPort() string
+	ElasticHost() string
+	AMQPPassword() string
+	AMQPHost() string
+	AMQPPort() string
+	AMQPUser() string
 }

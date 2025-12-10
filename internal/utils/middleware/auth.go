@@ -4,12 +4,15 @@ import (
 	"crypto/rand"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"k071123/internal/shared/permissions"
 	"k071123/internal/utils/errs"
 	auth "k071123/internal/utils/jwt_helpers"
+	"k071123/tools/logger"
 	"log"
 	"math/big"
 	"strings"
+	"time"
 )
 
 type Middleware struct {
@@ -162,6 +165,25 @@ func hasPermission(role permissions.Role, requiredPermissions []permissions.Perm
 		}
 	}
 	return true
+}
+
+func LoggerMiddleware(log *logger.Logger) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		start := time.Now()
+
+		err := c.Next()
+
+		log.WithFields(logrus.Fields{
+			"event":    "incoming request",
+			"path":     c.Path(),
+			"method":   c.Method(),
+			"ip":       c.IP(),
+			"status":   c.Response().StatusCode(),
+			"duration": time.Since(start).Milliseconds(),
+		})
+
+		return err
+	}
 }
 
 // GetUserUUIDFromContext извлекает UUID текущего пользователя из контекста (токена)

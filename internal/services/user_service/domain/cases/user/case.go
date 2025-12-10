@@ -83,3 +83,14 @@ func (uc *UserUseCase) UpdateProfile(args props.UpdateProfileReq) (resp props.Up
 	resp.User = user
 	return resp, nil
 }
+
+func (uc *UserUseCase) GetUserByUUID(args props.GetUserByUUIDReq) (resp props.GetUserByUUIDResp, err error) {
+	log := uc.ctx.Services().Logger().WithField("UserUseCase", "GetUserByUUID")
+	user, err := uc.ctx.Connection().User().GetByUUID(args.UUID)
+	if err != nil {
+		log.WithError(err).Errorf("unable to get user from db: [%v]", err.Error())
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	}
+	resp.User = user
+	return resp, nil
+}

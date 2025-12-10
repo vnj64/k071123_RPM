@@ -7,4 +7,5 @@ type VerificationCode interface {
 	Add(model *models.VerificationCode) error
 	GetByUUID(uuid string) (*models.VerificationCode, error)
 	GetByEmail(email string) (*models.VerificationCode, error)
+	GetLastByEmail(email string) (*models.VerificationCode, error)
 }

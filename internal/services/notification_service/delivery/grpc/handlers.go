@@ -37,6 +37,6 @@ func (h *GrpcHandler) SendEmail(c context.Context, req *proto.SendEmailReq) (*pr
 	}
 
 	return &proto.SendEmailResp{
-		Response: "success",
+		Response: resp.Status,
 	}, nil
 }

@@ -1,13 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Сервис для рассылки уведомлений",
-        "title": "Notification Service API",
-        "contact": {},
-        "version": "2.0"
+        "contact": {}
     },
-    "host": "localhost:7801",
-    "basePath": "/",
     "paths": {
         "/api/v1/sender/email": {
             "post": {
@@ -143,14 +138,6 @@
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "\"Enter your Bearer token in the format: `Bearer {token}`\"",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }

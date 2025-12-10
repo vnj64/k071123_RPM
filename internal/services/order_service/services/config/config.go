@@ -35,6 +35,13 @@ type AdminData struct {
 	PlatformFee string `env:"PLATFORM_FEE"`
 }
 
+type Elastic struct {
+	Host     string `env:"ELASTIC_HOST"`
+	Port     string `env:"ELASTIC_PORT"`
+	Username string `env:"ELASTIC_USERNAME"`
+	Password string `env:"ELASTIC_PASSWORD"`
+}
+
 type Config struct {
 	Postgres    Postgres
 	HttpServer  HttpServer
@@ -42,6 +49,7 @@ type Config struct {
 	Middleware  Middleware
 	OrderGrpc   OrderGrpc
 	AdminData   AdminData
+	Elastic     Elastic
 }
 
 func Make() *Config {
@@ -103,4 +111,20 @@ func (c *Config) OrderGrpcHost() string {
 
 func (c *Config) PlatformFee() string {
 	return c.AdminData.PlatformFee
+}
+
+func (c *Config) ElasticHost() string {
+	return c.Elastic.Host
+}
+
+func (c *Config) ElasticPort() string {
+	return c.Elastic.Port
+}
+
+func (c *Config) ElasticUsername() string {
+	return c.Elastic.Username
+}
+
+func (c *Config) ElasticPassword() string {
+	return c.Elastic.Password
 }

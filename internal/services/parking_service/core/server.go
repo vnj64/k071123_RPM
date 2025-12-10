@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"k071123/internal/services/parking_service/domain"
 	"k071123/internal/services/parking_service/services/config"
+	"k071123/internal/utils/middleware"
 	"runtime"
 	"strings"
 )
@@ -41,6 +42,9 @@ func NewHttpServer() Server {
 		AllowCredentials: true, // Убедимся, что можно передавать куки и авторизационные заголовки
 		MaxAge:           300,
 	})
+
+	app.Use(middleware.PanicRecovery(ctx.Services().Logger()))
+	app.Use(middleware.LoggerMiddleware(ctx.Services().Logger()))
 
 	app.Use(corsConfig)
 	app.Use(func(c *fiber.Ctx) error {

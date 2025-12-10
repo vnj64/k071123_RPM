@@ -15,7 +15,6 @@ type GrpcServer struct {
 	grpcServer *grpc.Server
 }
 
-// TODO: прийти к синглтону domain.Context
 func NewGrpcServer() *GrpcServer {
 	cfg := config.Make()
 	ctx := InitCtx()

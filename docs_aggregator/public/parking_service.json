@@ -66,63 +66,6 @@
                 }
             }
         },
-        "/api/v1/session/car": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Закончить парковочную сессию",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Session"
-                ],
-                "summary": "Закончить парковочную сессию",
-                "parameters": [
-                    {
-                        "description": "Данные для стопа сессии",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateCarReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Статус сессии.",
-                        "schema": {
-                            "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateCarResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Profile not found",
-                        "schema": {
-                            "$ref": "#/definitions/errs.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errs.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/session/start": {
             "post": {
                 "security": [
@@ -409,40 +352,6 @@
                 }
             }
         },
-        "k071123_internal_services_parking_service_domain_models.Car": {
-            "type": "object",
-            "properties": {
-                "gos_number": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "settings": {
-                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.CarSettings"
-                },
-                "settings_uuid": {
-                    "type": "string"
-                },
-                "user_uuid": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "k071123_internal_services_parking_service_domain_models.CarSettings": {
-            "type": "object",
-            "properties": {
-                "uuid": {
-                    "type": "string"
-                },
-                "vin": {
-                    "type": "string"
-                }
-            }
-        },
         "k071123_internal_services_parking_service_domain_models.Parking": {
             "type": "object",
             "properties": {
@@ -635,25 +544,6 @@
                 "Repair"
             ]
         },
-        "k071123_internal_services_parking_service_domain_props.CreateCarReq": {
-            "type": "object",
-            "properties": {
-                "gos_number": {
-                    "type": "string"
-                },
-                "user_uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "k071123_internal_services_parking_service_domain_props.CreateCarResp": {
-            "type": "object",
-            "properties": {
-                "car": {
-                    "$ref": "#/definitions/k071123_internal_services_parking_service_domain_models.Car"
-                }
-            }
-        },
         "k071123_internal_services_parking_service_domain_props.CreateParkingReq": {
             "type": "object",
             "properties": {
@@ -671,6 +561,9 @@
                 },
                 "tariff": {
                     "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.CreateTariffReq"
+                },
+                "tariff_uuid": {
+                    "type": "string"
                 },
                 "total_places": {
                     "type": "integer"
@@ -780,11 +673,11 @@
         "k071123_internal_services_parking_service_domain_props.FinishSessionRequest": {
             "type": "object",
             "properties": {
+                "car_number": {
+                    "type": "string"
+                },
                 "payment_method": {
                     "$ref": "#/definitions/k071123_internal_services_parking_service_domain_props.PaymentMethod"
-                },
-                "session_uuid": {
-                    "type": "string"
                 },
                 "unit_uuid": {
                     "type": "string"

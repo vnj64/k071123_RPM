@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/sirupsen/logrus"
 	"k071123/internal/services/parking_service/domain"
 	domainServices "k071123/internal/services/parking_service/domain/services"
 	"k071123/internal/services/parking_service/services/config"
@@ -16,14 +15,14 @@ type Ctx struct {
 
 type svs struct {
 	config domainServices.Config
-	logger *logrus.Logger
+	logger *logger.Logger
 }
 
 func (s *svs) Config() domainServices.Config {
 	return s.config
 }
 
-func (s *svs) Logger() *logrus.Logger {
+func (s *svs) Logger() *logger.Logger {
 	return s.logger
 }
 
@@ -45,14 +44,14 @@ func (c *Ctx) Make() domain.Context {
 func InitCtx() *Ctx {
 	cfg := config.Make()
 
-	loggerCfg := logger.Config{
+	log, err := logger.New(logger.Config{
 		Host:     cfg.ElasticHost(),
 		Port:     cfg.ElasticPort(),
 		Username: cfg.ElasticUsername(),
 		Password: cfg.ElasticPassword(),
 		Index:    "parking",
-	}
-	log, err := logger.New(loggerCfg)
+		Service:  "parking_service",
+	})
 	if err != nil {
 		panic(err)
 	}

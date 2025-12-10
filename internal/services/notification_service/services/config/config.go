@@ -30,11 +30,27 @@ type NotificationGrpc struct {
 	Host string `env:"NOTIFICATION_GRPC_HOST"`
 }
 
+type Elastic struct {
+	Host     string `env:"ELASTIC_HOST"`
+	Port     string `env:"ELASTIC_PORT"`
+	Username string `env:"ELASTIC_USERNAME"`
+	Password string `env:"ELASTIC_PASSWORD"`
+}
+
+type AMQP struct {
+	User     string `env:"RABBIT_USER"`
+	Password string `env:"RABBIT_PASS"`
+	Host     string `env:"RABBIT_HOST"`
+	Port     string `env:"RABBIT_PORT"`
+}
+
 type Config struct {
 	Postgres         Postgres
 	HttpServer       HttpServer
 	Smtp             Smtp
 	NotificationGrpc NotificationGrpc
+	Elastic          Elastic
+	AMQP             AMQP
 }
 
 func Make() *Config {
@@ -100,4 +116,36 @@ func (c *Config) NotificationGrpcPort() string {
 
 func (c *Config) NotificationGrpcHost() string {
 	return c.NotificationGrpc.Host
+}
+
+func (c *Config) ElasticHost() string {
+	return c.Elastic.Host
+}
+
+func (c *Config) ElasticPort() string {
+	return c.Elastic.Port
+}
+
+func (c *Config) ElasticUsername() string {
+	return c.Elastic.Username
+}
+
+func (c *Config) ElasticPassword() string {
+	return c.Elastic.Password
+}
+
+func (c *Config) AMQPUser() string {
+	return c.AMQP.User
+}
+
+func (c *Config) AMQPPassword() string {
+	return c.AMQP.Password
+}
+
+func (c *Config) AMQPHost() string {
+	return c.AMQP.Host
+}
+
+func (c *Config) AMQPPort() string {
+	return c.AMQP.Port
 }

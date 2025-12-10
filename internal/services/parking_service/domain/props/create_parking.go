@@ -17,10 +17,10 @@ type CreateParkingReq struct {
 	Longitude   string                  `json:"longitude"`
 	WorkingTime []CreateParkingSchedule `json:"working_time"`
 	TotalPlaces uint                    `json:"total_places"`
-	Tariff      CreateTariffReq         `json:"tariff"`
+	Tariff      *CreateTariffReq        `json:"tariff"`
+	TariffUUID  *string                 `json:"tariff_uuid"`
 }
 
-// TODO: days_of_week needs func int -> pq.Int64Array
 type CreateParkingSchedule struct {
 	DaysOfWeek pq.Int64Array `gorm:"type:integer[]" json:"days_of_week"`
 	OpenTime   string        `json:"open_time"`
@@ -51,8 +51,10 @@ func (req *CreateParkingReq) Validate() error {
 		return errors.New("total_places must be > 0")
 	}
 
-	if err := req.Tariff.Validate(); err != nil {
-		return fmt.Errorf("invalid tariff: %w", err)
+	if req.Tariff != nil {
+		if err := req.Tariff.Validate(); err != nil {
+			return fmt.Errorf("invalid tariff: %w", err)
+		}
 	}
 
 	if len(req.WorkingTime) == 0 {

@@ -13,4 +13,8 @@ type Config interface {
 	ElasticPort() string
 	ElasticUsername() string
 	ElasticPassword() string
+	UserGrpcPort() string
+	UserGrpcHost() string
+	NotificationGrpcHost() string
+	NotificationGrpcPort() string
 }

@@ -5,7 +5,6 @@ import (
 	"k071123/pkg/timestamps"
 )
 
-// TODO: UserUUID обязателен к привязке позже
 type Car struct {
 	Timestamps   timestamps.Timestamps `gorm:"embedded;" json:"-" swaggerignore:"true"`
 	UUID         uuid.UUID             `json:"uuid"`

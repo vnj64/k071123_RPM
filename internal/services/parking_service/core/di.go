@@ -29,17 +29,27 @@ func NewDi() *Di {
 		panic(err)
 	}
 
+	userGrpcClient, err := MakeUserServiceClient()
+	if err != nil {
+		panic(err)
+	}
+
+	notificationGrpcClient, err := MakeNotificationServiceClient()
+	if err != nil {
+		panic(err)
+	}
+
 	mw := middleware.NewMiddleware(cfg.PublicPemPath())
 	var (
 		parkingUseCase = parking.NewParkingUseCase(ctx)
-		parkingHandler = http.NewParkingHandler(parkingUseCase, mw)
+		parkingHandler = http.NewParkingHandler(parkingUseCase, mw, ctx.Services().Logger())
 
 		tariffUseCase = tariff.NewTariffUseCase(ctx)
 		tariffHandler = http.NewTariffHandler(tariffUseCase, mw)
 
 		carUseCase     = car.NewCarUseCase(ctx)
-		sessionUseCase = session.NewSessionUseCase(ctx, oc)
-		sessionHandler = http.NewSessionHandler(sessionUseCase, carUseCase, mw, oc)
+		sessionUseCase = session.NewSessionUseCase(ctx, oc, notificationGrpcClient, userGrpcClient)
+		sessionHandler = http.NewSessionHandler(sessionUseCase, carUseCase, mw, oc, ctx.Services().Logger())
 
 		unitUseCase = unit.NewUnitUseCase(ctx)
 		unitHandler = http.NewUnitHandler(unitUseCase, mw)

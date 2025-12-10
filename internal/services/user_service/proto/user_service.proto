@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package notification;
+
+option go_package = "contracts/pkg/proto";
+
+service User {
+  rpc GetUserByUUID(GetUserReq) returns (GetUserResp);
+}
+
+message GetUserReq {
+  string uuid = 1;
+};
+
+message GetUserResp {
+  string uuid = 1;
+  string firstName = 2;
+  string secondName = 3;
+  string birthDate = 4;
+  string status = 5;
+  string email = 6;
+  string role = 7;
+  string phoneNumber = 8;
+}

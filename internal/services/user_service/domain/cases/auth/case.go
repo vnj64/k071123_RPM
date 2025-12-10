@@ -31,7 +31,7 @@ func NewAuthUseCase(ctx domain.Context, nC proto.NotificationClient, pC proto2.P
 
 func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResponse, err error) {
 	// TODO: реализовать expiration_date
-
+	log := uc.ctx.Services().Logger().WithField("AuthUseCase", "SendCode")
 	code := generateRandomToken()
 	message := fmt.Sprintf("Your confirmation code for PRK Project: %s", code)
 	subject := "Your confirmation code"
@@ -43,24 +43,29 @@ func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResp
 		},
 	})
 	if err != nil {
+		log.Errorf("unable to send email: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, err.Error())
 	}
 	if response.Response == "failed" {
+		log.Errorf("email not sended. status Failed")
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "failed to send email")
 	}
 
 	if err := uc.ctx.Connection().VerificationCode().Add(&models.VerificationCode{
-		UUID:      uuid.New(),
-		Email:     args.Email,
-		Code:      code,
-		Used:      false,
-		CreatedAt: time.Now(),
+		UUID:           uuid.New(),
+		Email:          args.Email,
+		Code:           code,
+		Used:           false,
+		ExpirationDate: time.Now().Add(time.Minute * 10),
+		CreatedAt:      time.Now(),
 	}); err != nil {
+		log.Errorf("unable to insert verification code: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, err.Error())
 	}
 
 	user, err := uc.ctx.Connection().User().GetByEmail(args.Email)
 	if err != nil {
+		log.Errorf("unable to get user by email: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get user by email")
 	}
 	if user == nil {
@@ -76,46 +81,67 @@ func (uc *AuthUseCase) SendCode(args props.SendCodeReq) (resp props.SendCodeResp
 			},
 		}
 		if err := uc.ctx.Connection().User().Add(user); err != nil {
+			log.Errorf("unable to add user: %v", err)
 			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
 		}
 	}
 
-	// TODO: gRPC CreateCar/Connect To user
-	// TODO: это не работает
 	_, err = uc.parkingClient.CreateCar(context.Background(), &proto2.CreateCarReq{
 		UserUUID:  user.UUID.String(),
 		GosNumber: args.CarNumber,
 	})
+	if err != nil {
+		log.Errorf("unable to create parking car: %v", err)
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to create parking car")
+	}
 
 	return props.SendCodeResponse{
-		Status: "success",
+		Status: response.Response,
 	}, nil
 }
 
 func (uc *AuthUseCase) ConfirmCode(args props.ConfirmCodeReq) (resp props.ConfirmCodeResp, err error) {
-	verificationCode, err := uc.ctx.Connection().VerificationCode().GetByCode(args.Code)
+	log := uc.ctx.Services().Logger().WithField("AuthUseCase", "ConfirmCode")
+
+	verificationCode, err := uc.ctx.Connection().VerificationCode().GetLastByEmail(args.Email)
 	if err != nil {
+		log.Errorf("unable to get verification code: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
 	}
 	if verificationCode.Email != args.Email {
+		log.Warnf("wrong email")
 		return resp, errs.NewErrorWithDetails(errs.ErrForbidden, "you are now owner of this code")
 	}
+	if verificationCode.ExpirationDate.Unix() < time.Now().Unix() {
+		log.Errorf("code is expired")
+		return resp, errs.NewErrorWithDetails(errs.ErrForbidden, "code is expired")
+	}
 	if args.Code != verificationCode.Code {
+		log.Errorf("wrong verification code")
 		return resp, errs.NewErrorWithDetails(errs.ErrForbidden, "wrong code")
 	}
 
 	user, err := uc.ctx.Connection().User().GetByEmail(args.Email)
 	if err != nil {
+		log.Errorf("unable to get user by email: %v", err)
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
+	}
+
+	user.Status = user_status.Active
+	if err := uc.ctx.Connection().User().Save(user); err != nil {
+		log.Errorf("failed to save user: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
 	}
 
 	acToken, err := auth.GenerateAuthToken(user.UUID.String(), user.Role, uc.ctx.Services().Config())
 	if err != nil {
+		log.Errorf("unable to generate access token: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "cannot generate auth token")
 	}
 
 	refToken, err := auth.GenerateRefreshToken(user.UUID, uc.ctx.Services().Config())
 	if err != nil {
+		log.Errorf("unable to generate refresh token: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "cannot generate refresh token")
 	}
 	resp.AccessToken = acToken

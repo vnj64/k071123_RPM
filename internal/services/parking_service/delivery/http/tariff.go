@@ -48,7 +48,7 @@ func (h *TariffHandler) CreateTariffHandler(ctx *fiber.Ctx) error {
 		return errs.SendError(ctx, err)
 	}
 
-	resp, err := h.useCase.Create(args)
+	resp, err := h.useCase.CreateTariff(args)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}

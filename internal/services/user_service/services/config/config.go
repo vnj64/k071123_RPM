@@ -36,9 +36,21 @@ type ParkingGrpc struct {
 	Host string `env:"PARKING_GRPC_HOST"`
 }
 
+type UserGrpc struct {
+	Port string `env:"USER_GRPC_PORT"`
+	Host string `env:"USER_GRPC_HOST"`
+}
+
 type AdminData struct {
 	Login    string `env:"ADMIN_LOGIN"`
 	Password string `env:"ADMIN_PASSWORD"`
+}
+
+type Elastic struct {
+	Host     string `env:"ELASTIC_HOST"`
+	Port     string `env:"ELASTIC_PORT"`
+	Username string `env:"ELASTIC_USERNAME"`
+	Password string `env:"ELASTIC_PASSWORD"`
 }
 
 type Config struct {
@@ -47,7 +59,9 @@ type Config struct {
 	Jwt              Jwt
 	NotificationGrpc NotificationGrpc
 	ParkingGrpc      ParkingGrpc
+	UserGrpc         UserGrpc
 	AdminData        AdminData
+	Elastic          Elastic
 }
 
 func Make() *Config {
@@ -133,4 +147,28 @@ func (c *Config) AdminLogin() string {
 
 func (c *Config) AdminPassword() string {
 	return c.AdminData.Password
+}
+
+func (c *Config) ElasticHost() string {
+	return c.Elastic.Host
+}
+
+func (c *Config) ElasticPort() string {
+	return c.Elastic.Port
+}
+
+func (c *Config) ElasticUsername() string {
+	return c.Elastic.Username
+}
+
+func (c *Config) ElasticPassword() string {
+	return c.Elastic.Password
+}
+
+func (c *Config) UserGrpcPort() string {
+	return c.UserGrpc.Port
+}
+
+func (c *Config) UserGrpcHost() string {
+	return c.UserGrpc.Host
 }

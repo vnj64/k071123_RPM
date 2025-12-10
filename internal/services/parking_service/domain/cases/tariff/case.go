@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO: CRUD TARIFF
+
 type TariffUseCase struct {
 	ctx domain.Context
 }
@@ -17,7 +19,8 @@ func NewTariffUseCase(ctx domain.Context) *TariffUseCase {
 	return &TariffUseCase{ctx: ctx}
 }
 
-func (uc *TariffUseCase) Create(args props.CreateTariffReq) (resp props.CreateTariffResp, err error) {
+func (uc *TariffUseCase) CreateTariff(args props.CreateTariffReq) (resp props.CreateTariffResp, err error) {
+	log := uc.ctx.Services().Logger().WithField("TariffUseCase", "CreateTariff")
 	tariff := &models.Tariff{
 		UUID:            uuid.New(),
 		HourlyPrice:     args.HourlyPrice,
@@ -34,9 +37,8 @@ func (uc *TariffUseCase) Create(args props.CreateTariffReq) (resp props.CreateTa
 		tariff.FreeTime = args.FreeTime
 	}
 
-	if err := uc.ctx.Connection().TariffRepository().Add(&models.Tariff{
-		UUID: uuid.New(),
-	}); err != nil {
+	if err := uc.ctx.Connection().TariffRepository().Add(tariff); err != nil {
+		log.Errorf("error on adding tariff: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
 	}
 	resp.Tariff = tariff

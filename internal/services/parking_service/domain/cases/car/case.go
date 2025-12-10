@@ -12,14 +12,17 @@ type CarUseCase struct {
 	ctx domain.Context
 }
 
+// TODO: CRUD + GetByGosNumber
+
 func NewCarUseCase(ctx domain.Context) *CarUseCase {
 	return &CarUseCase{ctx: ctx}
 }
 
 func (uc *CarUseCase) CreateCar(args props.CreateCarReq) (resp props.CreateCarResp, err error) {
-	log := uc.ctx.Services().Logger()
+	log := uc.ctx.Services().Logger().WithField("CarUseCase", "CreateCar")
 	log.Printf("create car started work")
 	if err := args.Validate(); err != nil {
+		log.Errorf("validate input error: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
 	}
 
@@ -30,6 +33,7 @@ func (uc *CarUseCase) CreateCar(args props.CreateCarReq) (resp props.CreateCarRe
 		UserUUID:  uuid.MustParse(args.UserUUID),
 	}
 	if err := uc.ctx.Connection().CarRepository().Add(car); err != nil {
+		log.Errorf("failed to add car to database: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "database error")
 	}
 	resp.Car = car

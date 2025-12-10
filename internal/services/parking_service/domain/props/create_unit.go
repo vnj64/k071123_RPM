@@ -1,6 +1,7 @@
 package props
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"k071123/internal/services/parking_service/domain/models"
 	"k071123/internal/services/parking_service/domain/models/unit_statuses"
@@ -17,4 +18,13 @@ type CreateUniqReq struct {
 
 type CreateUnitResp struct {
 	Unit *models.Unit `json:"unit"`
+}
+
+func (r CreateUniqReq) Validate() error {
+	if r.Code != nil {
+		if len(*r.Code) != 6 {
+			return errors.New("code length must be 6")
+		}
+	}
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"k071123/internal/services/order_service/services/billings"
 	"k071123/internal/services/order_service/services/config"
 	"k071123/internal/services/order_service/storage/repositories"
+	"k071123/tools/logger"
 )
 
 type Ctx struct {
@@ -16,6 +17,7 @@ type Ctx struct {
 type svs struct {
 	config  domainServices.Config
 	billing domainServices.Billing
+	logger  *logger.Logger
 }
 
 func (s *svs) Config() domainServices.Config {
@@ -24,6 +26,10 @@ func (s *svs) Config() domainServices.Config {
 
 func (s *svs) Billing() domainServices.Billing {
 	return s.billing
+}
+
+func (s *svs) Logger() *logger.Logger {
+	return s.logger
 }
 
 func (c *Ctx) Services() domain.Services {
@@ -43,6 +49,20 @@ func (c *Ctx) Make() domain.Context {
 
 func InitCtx() *Ctx {
 	cfg := config.Make()
+
+	loggerCfg := logger.Config{
+		Host:     cfg.ElasticHost(),
+		Port:     cfg.ElasticPort(),
+		Username: cfg.ElasticUsername(),
+		Password: cfg.ElasticPassword(),
+		Index:    "order",
+		Service:  "order_service",
+	}
+	log, err := logger.New(loggerCfg)
+	if err != nil {
+		panic(err)
+	}
+
 	sqlConnection, err := repositories.NewConnection(
 		cfg.PostgresUser(),
 		cfg.PostgresPassword(),
@@ -60,6 +80,7 @@ func InitCtx() *Ctx {
 		services: &svs{
 			config:  cfg,
 			billing: billing,
+			logger:  log,
 		},
 		connection: sqlConnection,
 	}

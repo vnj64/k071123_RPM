@@ -12,6 +12,7 @@ services:
       - ./pgdata:/var/lib/postgresql/data/pgdata
     networks:
       - k070923_network
+
   mailhog:
     image: mailhog/mailhog:latest
     container_name: prk_mailhog
@@ -21,6 +22,21 @@ services:
       - "1025:1025"   # SMTP сервер
     networks:
       - k070923_network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: prk_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - k070923_network
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
 
 networks:
   k070923_network:

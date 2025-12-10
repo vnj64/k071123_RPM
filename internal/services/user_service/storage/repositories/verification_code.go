@@ -42,3 +42,11 @@ func (r *VerificationCodeRepository) GetByEmail(email string) (*models.Verificat
 func (r *VerificationCodeRepository) Add(model *models.VerificationCode) error {
 	return r.db.Create(model).Error
 }
+
+func (r *VerificationCodeRepository) GetLastByEmail(email string) (*models.VerificationCode, error) {
+	var model models.VerificationCode
+	if err := r.db.Where("email = ?", email).Order("created_at DESC").First(&model).Error; err != nil {
+		return nil, err
+	}
+	return &model, nil
+}

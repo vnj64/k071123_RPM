@@ -34,19 +34,19 @@ func (r *SessionRepository) GetByUUID(uuid string) (*models.Session, error) {
 }
 
 func (r *SessionRepository) WhereFilter(filter repositories.SessionFilter) ([]models.Session, error) {
-	var parkings []models.Session
+	var sessions []models.Session
 	f, ok := filter.(*sessionFilter)
 	if !ok {
 		return []models.Session{}, errors.New("wrong filter type")
 	}
 	query := f.query(r.db)
-	if err := r.db.Where(query).Find(&parkings).Error; err != nil {
+	if err := r.db.Where(query).Find(&sessions).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return []models.Session{}, nil
 		}
 		return nil, err
 	}
-	return parkings, nil
+	return sessions, nil
 }
 
 func (r *SessionRepository) Update(uuid uuid.UUID, updates repositories.SessionUpdates) error {

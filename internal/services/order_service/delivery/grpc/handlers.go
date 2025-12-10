@@ -2,17 +2,20 @@ package grpc
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"k071123/internal/services/order_service/contracts/pkg/proto"
 	"k071123/internal/services/order_service/domain"
 	"k071123/internal/services/order_service/domain/cases/card"
+	"k071123/internal/services/order_service/domain/cases/payment"
 	"k071123/internal/services/order_service/domain/props"
 	"time"
 )
 
 type GrpcHandler struct {
 	proto.UnimplementedOrderServer
-	ctx         domain.Context
-	cardUseCase *card.CardUseCase
+	ctx            domain.Context
+	cardUseCase    *card.CardUseCase
+	paymentUseCase *payment.PaymentUseCase
 }
 
 func NewHandler(ctx domain.Context, cardUseCase *card.CardUseCase) *GrpcHandler {
@@ -60,6 +63,31 @@ func (h *GrpcHandler) GetPreferredByUserUUID(c context.Context, req *proto.GetPr
 	}
 	if ucResp.Card.Token != nil {
 		resp.Card.Token = *ucResp.Card.Token
+	}
+	return resp, nil
+}
+
+func (h *GrpcHandler) CratePayment(ctx context.Context, req *proto.CreatePaymentReq) (*proto.CreatePaymentResp, error) {
+	userUid := uuid.MustParse(req.UserUuid)
+	sessionUid := uuid.MustParse(req.SessionUuid)
+	cardUid := uuid.MustParse(req.CardUuid)
+	reps, err := h.paymentUseCase.MakePayment(props.CreatePaymentReq{
+		UserUUID:      &userUid,
+		SessionUUID:   sessionUid,
+		PaymentMethod: "bank_card",
+		Amount:        float64(req.Amount),
+		Description:   req.Description,
+		CardUUID:      &cardUid,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp := &proto.CreatePaymentResp{
+		Payment: &proto.Payment{
+			Uuid:   reps.Payment.UUID.String(),
+			Status: string(reps.Payment.Status),
+			Amount: float32(reps.Payment.Amount),
+		},
 	}
 	return resp, nil
 }

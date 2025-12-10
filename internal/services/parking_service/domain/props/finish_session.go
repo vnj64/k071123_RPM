@@ -3,7 +3,7 @@ package props
 import "github.com/google/uuid"
 
 type FinishSessionRequest struct {
-	CarNumber     string        `json:"session_uuid"`
+	CarNumber     string        `json:"car_number"`
 	UnitUUID      uuid.UUID     `json:"unit_uuid"`
 	UserUUID      string        `json:"-"`
 	PaymentMethod PaymentMethod `json:"payment_method"`

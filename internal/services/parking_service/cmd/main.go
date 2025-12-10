@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"k071123/internal/services/parking_service/core"
 	"k071123/internal/services/parking_service/delivery/http"
-	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 )
 
 // @title Parking Service API
@@ -23,6 +27,11 @@ func main() {
 	server := core.NewHttpServer()
 	grpcServer := core.NewGrpcServer()
 
+	_, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	log := di.Ctx.Services().Logger()
+
 	handlers := &http.Handlers{
 		ParkingHandler: di.ParkingHandler,
 		TariffHandler:  di.TariffHandler,
@@ -35,11 +44,22 @@ func main() {
 	go func() {
 		server.Start()
 		defer wg.Done()
+		log.Info("http server started...")
 	}()
 	go func() {
 		grpcServer.Start()
 		defer wg.Done()
+		log.Info("grpc server started...")
 	}()
-	log.Printf("grpc server started")
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	<-sigs
+
+	log.Infoln("Shutting down parking service...")
+	cancel()
+	time.Sleep(time.Second)
+
 	wg.Wait()
+	log.Infoln("Parking service stopped gracefully")
 }
