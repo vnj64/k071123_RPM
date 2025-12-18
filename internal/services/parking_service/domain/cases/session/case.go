@@ -33,22 +33,29 @@ func NewSessionUseCase(
 
 // TODO: сделать Search по Sessions
 
-func (uc *SessionUseCase) Start(args props.StartSessionReq, oc proto.OrderClient) (resp props.StartSessionResp, err error) {
+func (uc *SessionUseCase) Start(args props.StartSessionReq) (resp props.StartSessionResp, err error) {
 	// unit parking uuid validation
 	log := uc.ctx.Services().Logger().WithField("SessionUseCase", "Start")
+	if err := args.Validate(); err != nil {
+		log.Errorf("unable to process request: %s", err.Error())
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
 	tx, err := uc.ctx.Connection().Begin()
 	if err != nil {
 		log.Errorf("begin transaction error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to start transaction")
 	}
-	defer tx.Rollback()
+	//defer tx.Rollback()
 
-	cardResp, err := oc.GetPreferredByUserUUID(context.Background(), &proto.GetPreferredCardReq{
+	cardResp, err := uc.oc.GetPreferredByUserUUID(context.Background(), &proto.GetPreferredCardReq{
 		UserUuid: args.UserUUID,
 	})
 	if err != nil {
 		log.Errorf("grpc error, cannot get card: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get user card from order service")
+	}
+	if cardResp == nil {
+		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "full order response in empty")
 	}
 	if cardResp.Card == nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "cannot start session without connected card")
@@ -101,14 +108,18 @@ func (uc *SessionUseCase) Start(args props.StartSessionReq, oc proto.OrderClient
 	return resp, nil
 }
 
-func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.OrderClient) (resp props.FinishSessionResp, err error) {
+func (uc *SessionUseCase) Finish(args props.FinishSessionRequest) (resp props.FinishSessionResp, err error) {
 	log := uc.ctx.Services().Logger().WithField("SessionUseCase", "Finish")
+	if err := args.Validate(); err != nil {
+		log.Errorf("unable to process request: %s", err.Error())
+		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())
+	}
 	tx, err := uc.ctx.Connection().Begin()
 	if err != nil {
 		log.Errorf("begin transaction error: %s", err.Error())
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to start transaction")
 	}
-	defer tx.Rollback()
+	//defer tx.Rollback()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -122,19 +133,19 @@ func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.Order
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to find user")
 	}
 
-	car, err := uc.ctx.Connection().CarRepository().GetByGosNumber(args.CarNumber)
+	car, err := tx.CarRepository().GetByGosNumber(args.CarNumber)
 	if err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get car by number")
 	}
 
-	unit, err := uc.ctx.Connection().UnitRepository().GetByUUID(args.UnitUUID.String())
+	unit, err := tx.UnitRepository().GetByUUID(args.UnitUUID.String())
 	if err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get unit by uuid")
 	}
 
 	// active
-	filter := uc.ctx.Connection().SessionRepository().Filter().SetCarUUIDs([]string{car.UUID.String()}).SetStatuses([]string{"active"})
-	sessions, err := uc.ctx.Connection().SessionRepository().WhereFilter(filter)
+	filter := tx.SessionRepository().Filter().SetCarUUIDs([]string{car.UUID.String()}).SetStatuses([]string{"active"})
+	sessions, err := tx.SessionRepository().WhereFilter(filter)
 	if err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get session by uuid")
 	}
@@ -143,12 +154,12 @@ func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.Order
 	}
 
 	session := sessions[0]
-	parking, err := uc.ctx.Connection().ParkingRepository().GetByUUID(unit.ParkingUUID.String())
+	parking, err := tx.ParkingRepository().GetByUUID(unit.ParkingUUID.String())
 	if err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get parking by uuid")
 	}
 
-	tf, err := uc.ctx.Connection().TariffRepository().GetByUUID(parking.TariffUUID.String())
+	tf, err := tx.TariffRepository().GetByUUID(parking.TariffUUID.String())
 	if err != nil {
 		return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to get tariff by uuid")
 	}
@@ -165,7 +176,7 @@ func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.Order
 
 	switch args.PaymentMethod {
 	case props.BankCard:
-		cardResp, err := oc.GetPreferredByUserUUID(context.Background(), &proto.GetPreferredCardReq{
+		cardResp, err := uc.oc.GetPreferredByUserUUID(context.Background(), &proto.GetPreferredCardReq{
 			UserUuid: args.UserUUID,
 		})
 		if err != nil {
@@ -175,7 +186,7 @@ func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.Order
 			return resp, errs.NewErrorWithDetails(errs.ErrInternalServerError, "unable to start session without connected bank card")
 		}
 
-		paymentResp, err := oc.CreatePayment(context.Background(), &proto.CreatePaymentReq{
+		paymentResp, err := uc.oc.CreatePayment(context.Background(), &proto.CreatePaymentReq{
 			SessionUuid:   session.UUID.String(),
 			PaymentMethod: string(args.PaymentMethod),
 			Amount:        float32(cost),
@@ -193,7 +204,7 @@ func (uc *SessionUseCase) Finish(args props.FinishSessionRequest, oc proto.Order
 	}
 
 	now := time.Now()
-	updates := uc.ctx.Connection().SessionRepository().Updates().
+	updates := tx.SessionRepository().Updates().
 		SetStatus(string(models.Finished)).
 		SetFinishAt(&now).
 		SetCost(cost)

@@ -20,7 +20,6 @@ func NewCarUseCase(ctx domain.Context) *CarUseCase {
 
 func (uc *CarUseCase) CreateCar(args props.CreateCarReq) (resp props.CreateCarResp, err error) {
 	log := uc.ctx.Services().Logger().WithField("CarUseCase", "CreateCar")
-	log.Printf("create car started work")
 	if err := args.Validate(); err != nil {
 		log.Errorf("validate input error: %v", err)
 		return resp, errs.NewErrorWithDetails(errs.ErrUnprocessableEntity, err.Error())

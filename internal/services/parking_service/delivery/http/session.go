@@ -74,7 +74,7 @@ func (h *SessionHandler) StartSessionHandler(ctx *fiber.Ctx) error {
 	}
 
 	args.UserUUID = userUUID
-	resp, err := h.useCase.Start(args, h.oc)
+	resp, err := h.useCase.Start(args)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}
@@ -108,7 +108,7 @@ func (h *SessionHandler) FinishSessionHandler(ctx *fiber.Ctx) error {
 	}
 	log.Infof("car number: %s", args.CarNumber)
 	args.UserUUID = userUUID
-	resp, err := h.useCase.Finish(args, h.oc)
+	resp, err := h.useCase.Finish(args)
 	if err != nil {
 		return errs.SendError(ctx, err)
 	}
